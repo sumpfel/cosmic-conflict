@@ -1,0 +1,13 @@
+[package]
+name = "cosmic-conflict"
+version.workspace = true
+edition.workspace = true
+
+[features]
+default = ["dev"]
+# Fast dev builds; disable for release.
+dev = ["bevy/dynamic_linking"]
+
+[dependencies]
+bevy = "0.20.1"
+cosmic-shared.workspace = true
