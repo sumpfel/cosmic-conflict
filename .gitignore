@@ -1,0 +1,34 @@
+# Rust / Cargo
+/target
+**/*.rs.bk
+*.pdb
+
+# Profiling / debug
+flamegraph.svg
+perf.data*
+*.profraw
+tracy-*
+
+# Editors / IDEs
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tooling (local AI/assistant state)
+.serena/
+.claude/
+
+# Env / secrets
+.env
+.env.*
+
+# Game saves / logs
+/saves/
+*.log

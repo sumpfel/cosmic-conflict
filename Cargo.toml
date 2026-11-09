@@ -1,0 +1,18 @@
+[package]
+name = "cosmic-conflict"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy = { version = "0.20.1", features = ["dynamic_linking"] }
+
+# Fast incremental builds: optimize deps, lightly optimize our code.
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
