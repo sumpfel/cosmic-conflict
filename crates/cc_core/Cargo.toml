@@ -1,0 +1,12 @@
+[package]
+name = "cc_core"
+description = "Cosmic Conflict shared rules: content definitions, star-system generation, match settings"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+ron.workspace = true
+libm.workspace = true
+glam.workspace = true

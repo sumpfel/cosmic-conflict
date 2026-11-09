@@ -1,17 +1,27 @@
 [workspace]
 resolver = "3"
-members = ["crates/game", "crates/server", "crates/shared"]
+members = ["crates/cc_core", "crates/cc_protocol", "crates/cc_sim", "crates/cc_server", "crates/game"]
 default-members = ["crates/game"]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/sumpfel/cosmic-conflict"
 
 [workspace.dependencies]
 serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "io-util", "sync"] }
-cosmic-shared = { path = "crates/shared" }
+ron = "0.12"
+libm = "0.2"
+glam = { version = "0.33", features = ["serde"] }
+postcard = { version = "1.1", features = ["use-std"] }
+crossbeam-channel = "0.5"
+log = "0.4"
+env_logger = "0.11"
+cc_core = { path = "crates/cc_core" }
+cc_protocol = { path = "crates/cc_protocol" }
+cc_sim = { path = "crates/cc_sim" }
+cc_server = { path = "crates/cc_server" }
 
 # Fast incremental builds: optimize deps, lightly optimize our code.
 [profile.dev]
@@ -21,5 +31,5 @@ opt-level = 1
 opt-level = 3
 
 [profile.release]
-codegen-units = 1
+codegen-units = 4
 lto = "thin"

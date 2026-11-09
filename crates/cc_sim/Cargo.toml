@@ -1,0 +1,10 @@
+[package]
+name = "cc_sim"
+description = "Cosmic Conflict authoritative game simulation (engine independent)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+cc_core.workspace = true
+cc_protocol.workspace = true

@@ -1,0 +1,17 @@
+[package]
+name = "cc_server"
+description = "Cosmic Conflict game server: lobby, match sessions, dedicated server binary"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "cc-server"
+path = "src/main.rs"
+
+[dependencies]
+log.workspace = true
+env_logger.workspace = true
+cc_core.workspace = true
+cc_protocol.workspace = true
+cc_sim.workspace = true

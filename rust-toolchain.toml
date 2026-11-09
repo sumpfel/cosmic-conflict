@@ -1,2 +1,4 @@
 [toolchain]
-channel = "stable"
+# Bevy 0.20 needs Rust >= 1.97.1. Pinned so every machine builds with the same compiler.
+channel = "1.99.1"
+components = ["rustfmt", "clippy"]

@@ -1,8 +1,0 @@
-[package]
-name = "cosmic-server"
-version.workspace = true
-edition.workspace = true
-
-[dependencies]
-cosmic-shared.workspace = true
-tokio.workspace = true
