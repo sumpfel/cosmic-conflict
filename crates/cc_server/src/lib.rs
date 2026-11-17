@@ -512,5 +512,8 @@ mod tests {
         let drone = content.unit_kind("drone").unwrap();
         c.send(&ClientMsg::Command(GameCommand::Train { building: cc, kind: drone }));
         recv(&c, |m| matches!(m, ServerMsg::Snapshot(s) if s.buildings[0].queue.len() == 1));
+        // Chat keeps working during the match (in-game chat overlay); control chars are stripped.
+        c.send(&ClientMsg::Lobby(LobbyCmd::Chat("gl\u{7} hf".into())));
+        recv(&c, |m| matches!(m, ServerMsg::Chat { from: Some(f), text } if *f == you && text == "gl hf"));
     }
 }

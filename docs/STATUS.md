@@ -1,6 +1,19 @@
 # Cosmic Conflict — Status & Roadmap
 
-_Last updated: 2026-11-09 (session 1)._
+_Last updated: 2026-11-16 (session 2)._
+
+## Session 2 (2026-11-16) — in-game chat
+
+- **In-game text chat** (`ui/hud.rs`, `chat_ui`): bottom left. While closed the last 6 lines show
+  for 10 s and fade, clicks pass through. **Enter** opens it with the full history and an input;
+  Enter sends, Esc / click outside closes (the draft is kept). A click sounds on messages from
+  others. Camera/order keys are blocked while typing (`egui_wants_keyboard_input`).
+- No protocol change: the server already relayed `LobbyCmd::Chat` in every phase. `ChatLog` lines
+  now carry an arrival time (`net::ChatLine`). `tcp_match` test checks chat during a match.
+- Verified on Windows: `cargo test --workspace --no-default-features -j 2` green, tried in-game
+  with two clients (host + join on 127.0.0.1).
+- **Next:** proximity chat once first-person mode exists — `All` / `Nearby` channels, the server
+  filters recipients by distance to the possessed unit (needs a protocol bump).
 
 ## Session 1 (2026-11-09) — foundation modelled on MMM
 

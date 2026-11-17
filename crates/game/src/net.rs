@@ -94,10 +94,21 @@ pub struct LobbyRes {
     pub state: Option<LobbyState>,
 }
 
+pub struct ChatLine {
+    /// `None` = a server message ("X joined.").
+    pub from: Option<PlayerId>,
+    pub text: String,
+    /// `Time::elapsed_secs_f64` when it arrived (the in-game overlay fades old lines).
+    pub at: f64,
+}
+
+/// Chat of the current server: shown in the lobby and in the in-game overlay.
 #[derive(Resource, Default)]
 pub struct ChatLog {
-    pub lines: Vec<(Option<PlayerId>, String)>,
+    pub lines: Vec<ChatLine>,
     pub input: String,
+    /// Lines received so far (keeps counting when old lines are dropped).
+    pub received: u64,
 }
 
 /// The match being loaded / played.
@@ -208,7 +219,8 @@ pub fn pump_network(
             }
             ServerMsg::Lobby(s) => lobby.state = Some(s),
             ServerMsg::Chat { from, text } => {
-                chat.lines.push((from, text));
+                chat.lines.push(ChatLine { from, text, at: time.elapsed_secs_f64() });
+                chat.received += 1;
                 if chat.lines.len() > 200 {
                     chat.lines.remove(0);
                 }

@@ -250,8 +250,9 @@ fn lobby_screen(
                 });
                 ui.separator();
                 egui::ScrollArea::vertical().max_height(150.0).stick_to_bottom(true).show(ui, |ui| {
-                    for (from, text) in &chat.lines {
-                        match from.and_then(|f| ls.players.iter().find(|p| p.id == f)) {
+                    for line in &chat.lines {
+                        let text = &line.text;
+                        match line.from.and_then(|f| ls.players.iter().find(|p| p.id == f)) {
                             Some(p) => {
                                 ui.label(RichText::new(format!("{}: {text}", p.name)).color(player_color32(p.color)));
                             }

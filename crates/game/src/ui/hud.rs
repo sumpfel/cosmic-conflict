@@ -7,7 +7,7 @@ use bevy::prelude::*;
 use bevy_egui::{EguiContexts, egui};
 use cc_core::content::{ContentDb, Cost};
 use cc_core::Res as Kind;
-use cc_protocol::{GameCommand, NO_PLANET};
+use cc_protocol::{ClientMsg, GameCommand, LobbyCmd, NO_PLANET};
 use egui::{Align2, Color32, RichText};
 
 use super::{ACCENT, BAD, DIM, GOOD, panel_frame, player_color32, res_color};
@@ -15,13 +15,86 @@ use crate::audio::{Sfx, Sound};
 use crate::game::camera::OrbitCam;
 use crate::game::input::{Drag, Placement, Selection, my_builders};
 use crate::game::world::ClientWorld;
-use crate::net::{HostedServer, MatchRes, Net, Notices};
+use crate::net::{ChatLine, ChatLog, HostedServer, MatchRes, Net, Notices};
 use crate::{AppState, Content, MenuScreen};
 
 #[derive(Resource, Default)]
 pub struct HudState {
     menu_open: bool,
     seen_notices: usize,
+    chat_open: bool,
+    /// Give the chat input keyboard focus on the next frame.
+    chat_focus: bool,
+    seen_chat: u64,
+}
+
+/// Seconds a chat line stays visible while the chat is closed.
+const CHAT_FADE: f64 = 10.0;
+const CHAT_WIDTH: f32 = 300.0;
+const CHAT_RECENT: usize = 6;
+
+fn chat_line(ui: &mut egui::Ui, world: &ClientWorld, line: &ChatLine, alpha: f32, backdrop: bool) {
+    use egui::text::{LayoutJob, TextFormat};
+    let font = egui::FontId::proportional(14.0);
+    let background = if backdrop { Color32::from_black_alpha((150.0 * alpha) as u8) } else { Color32::TRANSPARENT };
+    let fmt = |color: Color32, italics: bool| TextFormat { font_id: font.clone(), color: color.gamma_multiply(alpha), background, italics, ..Default::default() };
+    let mut job = LayoutJob::default();
+    match line.from {
+        Some(f) => {
+            job.append(&format!("{}: ", world.name_of(f)), 0.0, fmt(player_color32(world.color_of(f)), false));
+            job.append(&line.text, 0.0, fmt(Color32::WHITE, false));
+        }
+        None => job.append(&line.text, 0.0, fmt(DIM, true)),
+    }
+    ui.label(job);
+}
+
+/// Bottom-left chat. Closed: the last few lines fade out and clicks pass through.
+/// Enter opens it with the full history and an input; Enter sends, Esc / click outside closes
+/// (an unsent draft is kept).
+fn chat_ui(ctx: &egui::Context, world: &ClientWorld, chat: &mut ChatLog, hud: &mut HudState, net: &Net, sound: &mut Sound, now: f64) {
+    if chat.received != hud.seen_chat {
+        if chat.lines.last().is_some_and(|l| l.from.is_some_and(|f| f != world.me)) {
+            sound.ui(Sfx::Click);
+        }
+        hud.seen_chat = chat.received;
+    }
+    // `egui_wants_keyboard_input` is still last frame's state: no other text field has focus.
+    if !hud.chat_open && !ctx.egui_wants_keyboard_input() && ctx.input(|i| i.key_pressed(egui::Key::Enter)) {
+        hud.chat_open = true;
+        hud.chat_focus = true;
+    }
+    let open = hud.chat_open;
+    egui::Area::new("chat".into()).anchor(Align2::LEFT_BOTTOM, egui::vec2(10.0, -10.0)).interactable(open).show(ctx, |ui| {
+        if !open {
+            ui.set_width(CHAT_WIDTH);
+            let start = chat.lines.len().saturating_sub(CHAT_RECENT);
+            for line in chat.lines[start..].iter().filter(|l| now - l.at < CHAT_FADE) {
+                let alpha = (CHAT_FADE - (now - line.at)).clamp(0.0, 1.0) as f32;
+                chat_line(ui, world, line, alpha, true);
+            }
+            return;
+        }
+        panel_frame().show(ui, |ui| {
+            ui.set_width(CHAT_WIDTH);
+            egui::ScrollArea::vertical().max_height(220.0).stick_to_bottom(true).show(ui, |ui| {
+                for line in &chat.lines {
+                    chat_line(ui, world, line, 1.0, false);
+                }
+            });
+            let resp = ui.add(egui::TextEdit::singleline(&mut chat.input).hint_text("Message to everyone …").desired_width(f32::INFINITY));
+            if hud.chat_focus {
+                resp.request_focus();
+                hud.chat_focus = false;
+            } else if resp.lost_focus() {
+                if ui.input(|i| i.key_pressed(egui::Key::Enter)) && !chat.input.trim().is_empty() {
+                    net.send(ClientMsg::Lobby(LobbyCmd::Chat(std::mem::take(&mut chat.input))));
+                }
+                hud.chat_open = false;
+            }
+            ui.label(RichText::new("Enter: send · Esc: close").small().color(DIM));
+        });
+    });
 }
 
 fn cost_text(ui: &mut egui::Ui, cost: &Cost, stock: [f32; 3]) {
@@ -56,7 +129,7 @@ pub fn hud_ui(
     mut contexts: EguiContexts,
     world: Option<Res<ClientWorld>>,
     content: Res<Content>,
-    (mut net, mut hosted): (ResMut<Net>, ResMut<HostedServer>),
+    (mut net, mut hosted, mut chat): (ResMut<Net>, ResMut<HostedServer>, ResMut<ChatLog>),
     mres: Res<MatchRes>,
     mut notices: ResMut<Notices>,
     mut selection: ResMut<Selection>,
@@ -184,7 +257,7 @@ pub fn hud_ui(
                 ui.label(RichText::new("Nothing selected").color(DIM));
                 ui.label(RichText::new(
                     "Left click / drag: select · Right click: move, attack, help build · Double click a unit: all of its kind\n\
-                     Middle drag / WASD: rotate · Wheel: zoom · Tab: next planet · H: home · Space: system · F: focus selection",
+                     Middle drag / WASD: rotate · Wheel: zoom · Tab: next planet · H: home · Space: system · F: focus selection · Enter: chat",
                 ).small().color(DIM));
                 return;
             }
@@ -359,6 +432,9 @@ pub fn hud_ui(
             });
         });
     });
+
+    // --- Chat ------------------------------------------------------------------------------
+    chat_ui(&ctx, &world, &mut chat, &mut hud, &net, &mut sound, time.elapsed_secs_f64());
 
     // --- Notices ---------------------------------------------------------------------------
     egui::Area::new("notices".into()).anchor(Align2::RIGHT_BOTTOM, egui::vec2(-14.0, -14.0)).show(&ctx, |ui| {
