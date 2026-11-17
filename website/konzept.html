@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="de" data-bs-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Konzept · Cosmic Conflict</title>
+  <meta name="description" content="Das Spielkonzept von Cosmic Conflict: eigener Planet, Ressourcen, Expansion und Sieg.">
+  <meta name="theme-color" content="#0c0d0f">
+
+  <!-- Vorschau beim Teilen (Discord, WhatsApp …) – Bild: img/shared/og-image.jpg (1200×630) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Konzept · Cosmic Conflict">
+  <meta property="og:description" content="Das Spielkonzept von Cosmic Conflict: eigener Planet, Ressourcen, Expansion und Sieg.">
+  <meta property="og:image" content="img/shared/og-image.jpg">
+
+  <!-- Favicon: Platzhalter-Planet. Eigenes Icon: <link rel="icon" href="img/shared/favicon.png"> -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='17' fill='%23ebe7df'/%3E%3Cellipse cx='32' cy='32' rx='29' ry='8' fill='none' stroke='%23fa8c28' stroke-width='3' transform='rotate(-22 32 32)'/%3E%3C/svg%3E">
+
+  <!-- Schriften: Archivo (Text + Überschriften, variable Breite) und IBM Plex Mono (Daten) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+  <!-- Bootstrap 5.3 (Raster, Navigation) + Bootstrap Icons (nur Plattform-/Social-Logos) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Eigenes Stylesheet (immer als Letztes) -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-konzept">
+<a class="visually-hidden-focusable skip-link" href="#inhalt">Zum Inhalt springen</a>
+
+<!-- ================================================================
+     NAVIGATION (auf allen Seiten gleich – Änderungen in jede Datei übernehmen)
+     ================================================================ -->
+<nav class="navbar navbar-expand-lg fixed-top cc-nav" aria-label="Hauptnavigation">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">
+      <!-- Logo: img/shared/logo.png (quadratisch, mind. 128×128, transparent) -->
+      <span class="brand-mark bg-slot slot-nolabel" data-bg="img/shared/logo.png" aria-hidden="true"></span>
+      Cosmic Conflict
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Menü öffnen">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Start</a></li>
+        <li class="nav-item"><a class="nav-link" href="download.html">Download</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle active" href="erklaerung.html" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">Erklärung</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="erklaerung.html"><span class="num">00</span>Übersicht</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item active" aria-current="page" href="konzept.html"><span class="num">01</span>Konzept</a></li>
+            <li><a class="dropdown-item" href="entwicklung.html"><span class="num">02</span>Entwicklung</a></li>
+            <li><a class="dropdown-item" href="combat.html"><span class="num">03</span>Combat</a></li>
+            <li><a class="dropdown-item" href="hosting.html"><span class="num">04</span>Hosting</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="community.html">Community</a></li>
+        <li class="nav-item"><a class="nav-link" href="team.html">Team</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main id="inhalt">
+
+<!-- ================================================================
+     SEITENKOPF – Hintergrund: img/konzept/hero.jpg (1920×900) · Modell rechts
+     ================================================================ -->
+<header class="phead bg-slot shade-head" data-bg="img/konzept/hero.jpg">
+  <div class="container">
+    <div class="phead-grid">
+      <div class="phead-copy">
+        <nav class="crumbs" aria-label="Brotkrümelnavigation"><a href="index.html">Start</a><span>/</span><a href="erklaerung.html">Erklärung</a><span>/</span><span aria-current="page">Konzept</span></nav>
+        <h1>Konzept</h1>
+        <p class="lead">Kurzer Einleitungstext zum Spielkonzept.</p>
+      </div>
+      <div class="model-view" data-model="command_center" data-spin="0.18" data-pitch="24"></div>
+    </div>
+  </div>
+</header>
+
+
+<!-- ================================================================
+     01 IDEE
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head mb-0">
+      <div class="sec-label"><span class="num">01</span>Die Idee</div>
+      <h2 class="sec-title">Der „Elevator Pitch“: das Spielkonzept in zwei, drei Sätzen.</h2>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     02 BAUSTEINE – Bilder: img/konzept/planet.jpg, ressourcen.jpg,
+     expansion.jpg, sieg.jpg (4:3, 1200×900)
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">02</span>Bausteine</div>
+      <h2 class="sec-title">Vier Regeln, die alles bestimmen.</h2>
+    </div>
+
+    <div class="split">
+      <figure class="fig">
+        <div class="media r-43 bg-slot" data-bg="img/konzept/planet.jpg" role="img" aria-label="Eigener Planet"></div>
+        <figcaption><b>Abb. 01</b>Bildunterschrift</figcaption>
+      </figure>
+      <div>
+        <span class="label"><span class="signal">02.1</span> Baustein</span>
+        <h3>Ein Planet pro Spieler</h3>
+        <div class="prose"><p>Erklärung dieses Konzept-Bausteins.</p></div>
+        <ul class="ticks"><li>Detail 1</li><li>Detail 2</li></ul>
+      </div>
+    </div>
+
+    <div class="split flip">
+      <figure class="fig">
+        <div class="media r-43 bg-slot" data-bg="img/konzept/ressourcen.jpg" role="img" aria-label="Ressourcen"></div>
+        <figcaption><b>Abb. 02</b>Bildunterschrift</figcaption>
+      </figure>
+      <div>
+        <span class="label"><span class="signal">02.2</span> Baustein</span>
+        <h3>Ressourcen auf dem ganzen Globus</h3>
+        <div class="prose"><p>Erklärung dieses Konzept-Bausteins.</p></div>
+        <ul class="ticks"><li>Detail 1</li><li>Detail 2</li></ul>
+      </div>
+    </div>
+
+    <div class="split">
+      <figure class="fig">
+        <div class="media r-43 bg-slot" data-bg="img/konzept/expansion.jpg" role="img" aria-label="Expansion"></div>
+        <figcaption><b>Abb. 03</b>Bildunterschrift</figcaption>
+      </figure>
+      <div>
+        <span class="label"><span class="signal">02.3</span> Baustein</span>
+        <h3>Expansion ins Sternsystem</h3>
+        <div class="prose"><p>Erklärung dieses Konzept-Bausteins.</p></div>
+        <ul class="ticks"><li>Detail 1</li><li>Detail 2</li></ul>
+      </div>
+    </div>
+
+    <div class="split flip">
+      <figure class="fig">
+        <div class="media r-43 bg-slot" data-bg="img/konzept/sieg.jpg" role="img" aria-label="Sieg"></div>
+        <figcaption><b>Abb. 04</b>Bildunterschrift</figcaption>
+      </figure>
+      <div>
+        <span class="label"><span class="signal">02.4</span> Baustein</span>
+        <h3>Wie man gewinnt</h3>
+        <div class="prose"><p>Erklärung dieses Konzept-Bausteins.</p></div>
+        <ul class="ticks"><li>Detail 1</li><li>Detail 2</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     03 RESSOURCEN – die drei Vorkommen als 3D-Modelle aus dem Spiel
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">03</span>Wirtschaft</div>
+      <div>
+        <h2 class="sec-title">Drei Ressourcen.</h2>
+        <p class="lead">Ein Satz zur Wirtschaft im Spiel.</p>
+      </div>
+    </div>
+    <div class="cols" style="--n: 3">
+      <div>
+        <span class="num">03.1</span>
+        <div class="model-view" data-model="deposit_metal" data-spin="0.25" data-pitch="26"></div>
+        <h3>Metall</h3>
+        <p>Wofür wird die Ressource gebraucht, wo findet man sie?</p>
+      </div>
+      <div>
+        <span class="num">03.2</span>
+        <div class="model-view" data-model="deposit_crystal" data-spin="0.25" data-pitch="26"></div>
+        <h3>Kristall</h3>
+        <p>Wofür wird die Ressource gebraucht, wo findet man sie?</p>
+      </div>
+      <div>
+        <span class="num">03.3</span>
+        <div class="model-view" data-model="deposit_gas" data-spin="0.25" data-pitch="26"></div>
+        <h3>Gas</h3>
+        <p>Wofür wird die Ressource gebraucht, wo findet man sie?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     ZITAT – Hintergrund: img/konzept/parallax.jpg (1920×1080)
+     ================================================================ -->
+<section class="band bg-slot shade" data-bg="img/konzept/parallax.jpg">
+  <div class="container">
+    <p class="quote">Ein Leitsatz, der das Konzept zusammenfasst.</p>
+    <p class="label mt-4 mb-0">— Designprinzip</p>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     04 VERGLEICH
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">04</span>Inspiration</div>
+      <div>
+        <h2 class="sec-title">Was ist anders?</h2>
+        <p class="lead">Ein Satz zur Inspiration für das Spiel.</p>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table tbl">
+        <thead><tr><th scope="col">Aspekt</th><th scope="col">Vorbild</th><th scope="col">Cosmic Conflict</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Spielfeld</th><td>–</td><td>–</td></tr>
+          <tr><th scope="row">Start</th><td>–</td><td>–</td></tr>
+          <tr><th scope="row">Ressourcen</th><td>–</td><td>–</td></tr>
+          <tr><th scope="row">Kampf</th><td>–</td><td>–</td></tr>
+          <tr><th scope="row">Sieg</th><td>–</td><td>–</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     05 BIOME – Bilder: img/konzept/biom-1.jpg … biom-6.jpg (4:3, 800×600)
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">05</span>Welten</div>
+      <div>
+        <h2 class="sec-title">Planeten und Biome.</h2>
+        <p class="lead">Ein Satz zu den verschiedenen Planetentypen.</p>
+      </div>
+    </div>
+    <div class="row g-3">
+      <figure class="col-6 col-lg-4 m-0"><div class="media r-43 bg-slot" data-bg="img/konzept/biom-1.jpg" role="img" aria-label="Biom Terra"></div><figcaption class="figcap"><b>05.1</b>Terra</figcaption></figure>
+      <figure class="col-6 col-lg-4 m-0"><div class="media r-43 bg-slot" data-bg="img/konzept/biom-2.jpg" role="img" aria-label="Biom Dschungel"></div><figcaption class="figcap"><b>05.2</b>Dschungel</figcaption></figure>
+      <figure class="col-6 col-lg-4 m-0"><div class="media r-43 bg-slot" data-bg="img/konzept/biom-3.jpg" role="img" aria-label="Biom Wüste"></div><figcaption class="figcap"><b>05.3</b>Wüste</figcaption></figure>
+      <figure class="col-6 col-lg-4 m-0"><div class="media r-43 bg-slot" data-bg="img/konzept/biom-4.jpg" role="img" aria-label="Biom Eis"></div><figcaption class="figcap"><b>05.4</b>Eis</figcaption></figure>
+      <figure class="col-6 col-lg-4 m-0"><div class="media r-43 bg-slot" data-bg="img/konzept/biom-5.jpg" role="img" aria-label="Biom Vulkan"></div><figcaption class="figcap"><b>05.5</b>Vulkan</figcaption></figure>
+      <figure class="col-6 col-lg-4 m-0"><div class="media r-43 bg-slot" data-bg="img/konzept/biom-6.jpg" role="img" aria-label="Biom Toxisch"></div><figcaption class="figcap"><b>05.6</b>Toxisch</figcaption></figure>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ================================================================
+     FOOTER
+     ================================================================ -->
+<footer class="cc-footer">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <p class="dim mb-0" style="max-width: 24em">Ein Satz über das Spiel – zum Beispiel euer Slogan.</p>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2 offset-lg-1">
+        <h2 class="footer-title">Spiel</h2>
+        <ul class="footer-links">
+          <li><a href="index.html">Start</a></li>
+          <li><a href="download.html">Download</a></li>
+          <li><a href="erklaerung.html">Erklärung</a></li>
+          <li><a href="konzept.html">Konzept</a></li>
+          <li><a href="entwicklung.html">Entwicklung</a></li>
+          <li><a href="combat.html">Combat</a></li>
+          <li><a href="hosting.html">Hosting</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <h2 class="footer-title">Leute</h2>
+        <ul class="footer-links">
+          <li><a href="community.html">Community</a></li>
+          <li><a href="team.html">Team</a></li>
+          <li><a href="#">Kontakt</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <h2 class="footer-title">Kanäle</h2>
+        <ul class="footer-links">
+          <li><a href="#">Discord</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">YouTube</a></li>
+        </ul>
+      </div>
+    </div>
+    <svg class="wordmark" viewBox="0 0 1000 96" aria-hidden="true" focusable="false"><text x="0" y="92" textLength="1000" lengthAdjust="spacingAndGlyphs">COSMIC CONFLICT</text></svg>
+    <div class="footer-bottom">
+      <span>&copy; <span data-year>2026</span> Cosmic Conflict · [Team / Schule]</span>
+      <span>3D-Modelle aus dem Spiel, in Echtzeit gerendert</span>
+      <span><a href="#">Impressum</a> · <a href="#">Datenschutz</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="js/main.js"></script>
+<!-- 3D-Modelle (three.js) -->
+<script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  } }
+</script>
+<script type="module" src="js/showroom.js"></script>
+</body>
+</html>

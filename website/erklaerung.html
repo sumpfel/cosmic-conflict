@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="de" data-bs-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Erklärung · Cosmic Conflict</title>
+  <meta name="description" content="So funktioniert Cosmic Conflict: Überblick, Spielablauf, Steuerung und FAQ.">
+  <meta name="theme-color" content="#0c0d0f">
+
+  <!-- Vorschau beim Teilen (Discord, WhatsApp …) – Bild: img/shared/og-image.jpg (1200×630) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Erklärung · Cosmic Conflict">
+  <meta property="og:description" content="So funktioniert Cosmic Conflict: Überblick, Spielablauf, Steuerung und FAQ.">
+  <meta property="og:image" content="img/shared/og-image.jpg">
+
+  <!-- Favicon: Platzhalter-Planet. Eigenes Icon: <link rel="icon" href="img/shared/favicon.png"> -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='17' fill='%23ebe7df'/%3E%3Cellipse cx='32' cy='32' rx='29' ry='8' fill='none' stroke='%23fa8c28' stroke-width='3' transform='rotate(-22 32 32)'/%3E%3C/svg%3E">
+
+  <!-- Schriften: Archivo (Text + Überschriften, variable Breite) und IBM Plex Mono (Daten) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+  <!-- Bootstrap 5.3 (Raster, Navigation) + Bootstrap Icons (nur Plattform-/Social-Logos) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Eigenes Stylesheet (immer als Letztes) -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-erklaerung">
+<a class="visually-hidden-focusable skip-link" href="#inhalt">Zum Inhalt springen</a>
+
+<!-- ================================================================
+     NAVIGATION (auf allen Seiten gleich – Änderungen in jede Datei übernehmen)
+     ================================================================ -->
+<nav class="navbar navbar-expand-lg fixed-top cc-nav" aria-label="Hauptnavigation">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">
+      <!-- Logo: img/shared/logo.png (quadratisch, mind. 128×128, transparent) -->
+      <span class="brand-mark bg-slot slot-nolabel" data-bg="img/shared/logo.png" aria-hidden="true"></span>
+      Cosmic Conflict
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Menü öffnen">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Start</a></li>
+        <li class="nav-item"><a class="nav-link" href="download.html">Download</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle active" href="erklaerung.html" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">Erklärung</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item active" aria-current="page" href="erklaerung.html"><span class="num">00</span>Übersicht</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="konzept.html"><span class="num">01</span>Konzept</a></li>
+            <li><a class="dropdown-item" href="entwicklung.html"><span class="num">02</span>Entwicklung</a></li>
+            <li><a class="dropdown-item" href="combat.html"><span class="num">03</span>Combat</a></li>
+            <li><a class="dropdown-item" href="hosting.html"><span class="num">04</span>Hosting</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="community.html">Community</a></li>
+        <li class="nav-item"><a class="nav-link" href="team.html">Team</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main id="inhalt">
+
+<!-- ================================================================
+     SEITENKOPF – Hintergrund: img/erklaerung/hero.jpg (1920×900) · Modell rechts
+     ================================================================ -->
+<header class="phead bg-slot shade-head" data-bg="img/erklaerung/hero.jpg">
+  <div class="container">
+    <div class="phead-grid">
+      <div class="phead-copy">
+        <nav class="crumbs" aria-label="Brotkrümelnavigation"><a href="index.html">Start</a><span>/</span><span aria-current="page">Erklärung</span></nav>
+        <h1>Erklärung</h1>
+        <p class="lead">Kurzer Einleitungstext: Was lernt man auf dieser Seite und den Unterseiten?</p>
+      </div>
+      <div class="model-view" data-model="drone" data-spin="0.3"></div>
+    </div>
+  </div>
+</header>
+
+
+<!-- ================================================================
+     01 ÜBERBLICK
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">01</span>Überblick</div>
+      <h2 class="sec-title">Worum geht's?</h2>
+    </div>
+    <div class="split align-items-start">
+      <div>
+        <p class="lead">Ein einleitender Absatz, der das Spiel für Neulinge erklärt.</p>
+        <div class="prose mt-3">
+          <p>Weiterer Absatz: Wie ist das Spiel mit ähnlichen Spielen verwandt, was ist anders? Welche Rolle spielt der eigene Planet?</p>
+          <p>Noch ein Absatz, falls nötig.</p>
+        </div>
+      </div>
+      <div>
+        <span class="label d-block mb-2">Auf einen Blick</span>
+        <dl class="spec">
+          <div><dt>Genre</dt><dd>–</dd></div>
+          <div><dt>Spieler</dt><dd>–</dd></div>
+          <div><dt>Spieldauer</dt><dd>–</dd></div>
+          <div><dt>Ziel</dt><dd>–</dd></div>
+          <div><dt>Modus</dt><dd>–</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     02 THEMEN – Vorschaubilder: img/erklaerung/konzept.jpg, entwicklung.jpg,
+     combat.jpg, hosting.jpg (16:10, 640×400)
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">02</span>Themen</div>
+      <h2 class="sec-title">Tiefer eintauchen.</h2>
+    </div>
+    <ul class="rows">
+      <li><a class="row-link has-thumb" href="konzept.html"><span class="num">02.1</span><span class="thumb bg-slot" data-bg="img/erklaerung/konzept.jpg"></span><div><h3>Konzept</h3><p>Ein Satz, worum es auf der Seite geht.</p></div><span class="go"></span></a></li>
+      <li><a class="row-link has-thumb" href="entwicklung.html"><span class="num">02.2</span><span class="thumb bg-slot" data-bg="img/erklaerung/entwicklung.jpg"></span><div><h3>Entwicklung</h3><p>Ein Satz, worum es auf der Seite geht.</p></div><span class="go"></span></a></li>
+      <li><a class="row-link has-thumb" href="combat.html"><span class="num">02.3</span><span class="thumb bg-slot" data-bg="img/erklaerung/combat.jpg"></span><div><h3>Combat</h3><p>Ein Satz, worum es auf der Seite geht.</p></div><span class="go"></span></a></li>
+      <li><a class="row-link has-thumb" href="hosting.html"><span class="num">02.4</span><span class="thumb bg-slot" data-bg="img/erklaerung/hosting.jpg"></span><div><h3>Hosting</h3><p>Ein Satz, worum es auf der Seite geht.</p></div><span class="go"></span></a></li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     03 SPIELABLAUF – fünf Schritte, jeweils mit einem Modell aus dem Spiel
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">03</span>Spielablauf</div>
+      <h2 class="sec-title">Eine Partie in fünf Schritten.</h2>
+    </div>
+    <div class="cols" style="--n: 5">
+      <div>
+        <span class="num">Schritt 01</span>
+        <div class="model-view" style="--ratio: 1" data-model="scout_rover" data-spin="0.4"></div>
+        <h3>Planet erkunden</h3>
+        <p>Kurze Beschreibung.</p>
+      </div>
+      <div>
+        <span class="num">Schritt 02</span>
+        <div class="model-view" style="--ratio: 1" data-model="extractor" data-spin="0.4"></div>
+        <h3>Ressourcen abbauen</h3>
+        <p>Kurze Beschreibung.</p>
+      </div>
+      <div>
+        <span class="num">Schritt 03</span>
+        <div class="model-view" style="--ratio: 1" data-model="factory" data-spin="0.4"></div>
+        <h3>Basis ausbauen</h3>
+        <p>Kurze Beschreibung.</p>
+      </div>
+      <div>
+        <span class="num">Schritt 04</span>
+        <div class="model-view" style="--ratio: 1" data-model="colony_ship" data-spin="0.4"></div>
+        <h3>Expandieren</h3>
+        <p>Kurze Beschreibung.</p>
+      </div>
+      <div>
+        <span class="num">Schritt 05</span>
+        <div class="model-view" style="--ratio: 1" data-model="battlecruiser" data-spin="0.4"></div>
+        <h3>System erobern</h3>
+        <p>Kurze Beschreibung.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     04 OBERFLÄCHE – Screenshot: img/erklaerung/hud.jpg (16:9, 1920×1080)
+     Markierungen verschieben: style="--x: 20%; --y: 30%"
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">04</span>Oberfläche</div>
+      <h2 class="sec-title">Was du auf dem Bildschirm siehst.</h2>
+    </div>
+    <div class="row g-5">
+      <div class="col-lg-8">
+        <figure class="fig">
+          <div class="pins">
+            <div class="media r-video bg-slot" data-bg="img/erklaerung/hud.jpg" role="img" aria-label="Screenshot der Spieloberfläche"></div>
+            <span class="pin" style="--x: 12%; --y: 14%">01</span>
+            <span class="pin" style="--x: 50%; --y: 8%">02</span>
+            <span class="pin" style="--x: 86%; --y: 80%">03</span>
+            <span class="pin" style="--x: 16%; --y: 84%">04</span>
+          </div>
+          <figcaption><b>Abb. 01</b>Spieloberfläche</figcaption>
+        </figure>
+      </div>
+      <div class="col-lg-4">
+        <ol class="legend">
+          <li><div><strong>Element 1</strong><br><span>Was zeigt dieser Bereich?</span></div></li>
+          <li><div><strong>Element 2</strong><br><span>Was zeigt dieser Bereich?</span></div></li>
+          <li><div><strong>Element 3</strong><br><span>Was zeigt dieser Bereich?</span></div></li>
+          <li><div><strong>Element 4</strong><br><span>Was zeigt dieser Bereich?</span></div></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     05 STEUERUNG – Bild: img/erklaerung/steuerung.jpg (4:5, 960×1200)
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">05</span>Steuerung</div>
+      <h2 class="sec-title">Maus und Tastatur.</h2>
+    </div>
+    <div class="split align-items-start">
+      <div class="table-responsive">
+        <table class="table tbl">
+          <thead><tr><th scope="col">Eingabe</th><th scope="col">Aktion</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Linksklick</th><td>–</td></tr>
+            <tr><th scope="row">Rechtsklick</th><td>–</td></tr>
+            <tr><th scope="row"><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></th><td>–</td></tr>
+            <tr><th scope="row">Mausrad</th><td>–</td></tr>
+            <tr><th scope="row"><kbd>Leertaste</kbd></th><td>–</td></tr>
+            <tr><th scope="row"><kbd>Esc</kbd></th><td>–</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <figure class="fig">
+        <div class="media r-portrait bg-slot" data-bg="img/erklaerung/steuerung.jpg" role="img" aria-label="Einheiten-Auswahl im Spiel"></div>
+        <figcaption><b>Abb. 02</b>Bildunterschrift</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     06 FAQ
+     ================================================================ -->
+<section class="sec" id="faq">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">06</span>FAQ</div>
+      <div>
+        <h2 class="sec-title">Häufige Fragen.</h2>
+        <p class="lead">Nicht dabei? Frag in der <a href="community.html">Community</a>.</p>
+      </div>
+    </div>
+    <div class="qa">
+      <details open><summary>Frage 1?</summary><div class="answer">Antwort auf Frage 1.</div></details>
+      <details><summary>Frage 2?</summary><div class="answer">Antwort auf Frage 2.</div></details>
+      <details><summary>Frage 3?</summary><div class="answer">Antwort auf Frage 3.</div></details>
+      <details><summary>Frage 4?</summary><div class="answer">Antwort auf Frage 4.</div></details>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ================================================================
+     FOOTER
+     ================================================================ -->
+<footer class="cc-footer">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <p class="dim mb-0" style="max-width: 24em">Ein Satz über das Spiel – zum Beispiel euer Slogan.</p>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2 offset-lg-1">
+        <h2 class="footer-title">Spiel</h2>
+        <ul class="footer-links">
+          <li><a href="index.html">Start</a></li>
+          <li><a href="download.html">Download</a></li>
+          <li><a href="erklaerung.html">Erklärung</a></li>
+          <li><a href="konzept.html">Konzept</a></li>
+          <li><a href="entwicklung.html">Entwicklung</a></li>
+          <li><a href="combat.html">Combat</a></li>
+          <li><a href="hosting.html">Hosting</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <h2 class="footer-title">Leute</h2>
+        <ul class="footer-links">
+          <li><a href="community.html">Community</a></li>
+          <li><a href="team.html">Team</a></li>
+          <li><a href="#">Kontakt</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <h2 class="footer-title">Kanäle</h2>
+        <ul class="footer-links">
+          <li><a href="#">Discord</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">YouTube</a></li>
+        </ul>
+      </div>
+    </div>
+    <svg class="wordmark" viewBox="0 0 1000 96" aria-hidden="true" focusable="false"><text x="0" y="92" textLength="1000" lengthAdjust="spacingAndGlyphs">COSMIC CONFLICT</text></svg>
+    <div class="footer-bottom">
+      <span>&copy; <span data-year>2026</span> Cosmic Conflict · [Team / Schule]</span>
+      <span>3D-Modelle aus dem Spiel, in Echtzeit gerendert</span>
+      <span><a href="#">Impressum</a> · <a href="#">Datenschutz</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="js/main.js"></script>
+<!-- 3D-Modelle (three.js) -->
+<script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  } }
+</script>
+<script type="module" src="js/showroom.js"></script>
+</body>
+</html>

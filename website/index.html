@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="de" data-bs-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cosmic Conflict – Echtzeit-Strategie im All</title>
+  <meta name="description" content="Cosmic Conflict: Jeder Spieler startet auf seinem eigenen Planeten. Kurzbeschreibung des Spiels.">
+  <meta name="theme-color" content="#0c0d0f">
+
+  <!-- Vorschau beim Teilen (Discord, WhatsApp …) – Bild: img/shared/og-image.jpg (1200×630) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Cosmic Conflict – Echtzeit-Strategie im All">
+  <meta property="og:description" content="Cosmic Conflict: Jeder Spieler startet auf seinem eigenen Planeten. Kurzbeschreibung des Spiels.">
+  <meta property="og:image" content="img/shared/og-image.jpg">
+
+  <!-- Favicon: Platzhalter-Planet. Eigenes Icon: <link rel="icon" href="img/shared/favicon.png"> -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='17' fill='%23ebe7df'/%3E%3Cellipse cx='32' cy='32' rx='29' ry='8' fill='none' stroke='%23fa8c28' stroke-width='3' transform='rotate(-22 32 32)'/%3E%3C/svg%3E">
+
+  <!-- Schriften: Archivo (Text + Überschriften, variable Breite) und IBM Plex Mono (Daten) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+  <!-- Bootstrap 5.3 (Raster, Navigation) + Bootstrap Icons (nur Plattform-/Social-Logos) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Eigenes Stylesheet (immer als Letztes) -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-index">
+<a class="visually-hidden-focusable skip-link" href="#inhalt">Zum Inhalt springen</a>
+
+<!-- ================================================================
+     NAVIGATION (auf allen Seiten gleich – Änderungen in jede Datei übernehmen)
+     ================================================================ -->
+<nav class="navbar navbar-expand-lg fixed-top cc-nav" aria-label="Hauptnavigation">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">
+      <!-- Logo: img/shared/logo.png (quadratisch, mind. 128×128, transparent) -->
+      <span class="brand-mark bg-slot slot-nolabel" data-bg="img/shared/logo.png" aria-hidden="true"></span>
+      Cosmic Conflict
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Menü öffnen">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link active" aria-current="page" href="index.html">Start</a></li>
+        <li class="nav-item"><a class="nav-link" href="download.html">Download</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="erklaerung.html" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">Erklärung</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="erklaerung.html"><span class="num">00</span>Übersicht</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="konzept.html"><span class="num">01</span>Konzept</a></li>
+            <li><a class="dropdown-item" href="entwicklung.html"><span class="num">02</span>Entwicklung</a></li>
+            <li><a class="dropdown-item" href="combat.html"><span class="num">03</span>Combat</a></li>
+            <li><a class="dropdown-item" href="hosting.html"><span class="num">04</span>Hosting</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="community.html">Community</a></li>
+        <li class="nav-item"><a class="nav-link" href="team.html">Team</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main id="inhalt">
+
+<!-- ================================================================
+     HERO – Hintergrundbild: img/start/hero.jpg (1920×1080, Motiv eher rechts)
+     Rechts: echtes 3D-Modell aus dem Spiel (data-model = Modellname)
+     ================================================================ -->
+<header class="hero bg-slot shade-left" data-bg="img/start/hero.jpg">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="label">Echtzeit-Strategie · Mehrspieler · PC</span>
+        <h1 class="hero-title">Cosmic <span>Conflict</span></h1>
+        <p class="lead">Ein bis zwei Sätze, die das Spiel auf den Punkt bringen – zum Beispiel, dass jeder Spieler auf seinem eigenen Planeten startet.</p>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <a class="btn btn-signal arrow" href="download.html">Herunterladen</a>
+          <a class="btn btn-line" href="erklaerung.html">Wie es funktioniert</a>
+        </div>
+      </div>
+      <figure class="hero-stage m-0">
+        <div class="model-view" id="hero-model" data-model="battlecruiser" data-spin="0.2" data-angle="-35" data-pitch="14" data-zoom="1.45"></div>
+        <figcaption class="figcap"><b>Abb. 01</b><span><span data-model-name="hero-model">Battlecruiser</span> · Echtzeit-Render · ziehen zum Drehen</span></figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<section aria-label="Eckdaten" class="readout">
+  <dl class="container m-0">
+    <div><dt>Spieler</dt><dd>2–8</dd></div>
+    <div><dt>Genre</dt><dd>Echtzeit-Strategie</dd></div>
+    <div><dt>Welt</dt><dd>Ein Planet pro Spieler</dd></div>
+    <div><dt>Modus</dt><dd>LAN / Online</dd></div>
+    <div><dt>Status</dt><dd>Alpha</dd></div>
+  </dl>
+</section>
+
+
+<!-- ================================================================
+     01 DEIN PLANET – Bild: img/start/intro.jpg (4:3, 1200×900)
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">01</span>Dein Planet</div>
+      <h2 class="sec-title">Eine ganze Welt, nur für dich.</h2>
+    </div>
+    <div class="split">
+      <div>
+        <p class="lead">Einleitender Absatz: Was erwartet die Spieler, was macht das Spiel besonders?</p>
+        <div class="prose mt-3"><p>Zweiter Absatz mit mehr Details. Hier kannst du erklären, wie sich das Spiel von ähnlichen Spielen unterscheidet.</p></div>
+        <ul class="ticks">
+          <li>Stichpunkt 1 – ein Alleinstellungsmerkmal</li>
+          <li>Stichpunkt 2 – ein weiteres Feature</li>
+          <li>Stichpunkt 3 – noch ein Grund zum Spielen</li>
+        </ul>
+        <a class="link arrow" href="konzept.html">Zum Konzept</a>
+      </div>
+      <figure class="fig">
+        <div class="media r-43 bg-slot" data-bg="img/start/intro.jpg" role="img" aria-label="Heimatplanet eines Spielers"></div>
+        <figcaption><b>Abb. 02</b>Bildunterschrift</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     02 ARSENAL – 3D-Hangar mit Modellen aus dem Spiel
+     data-keys: welche Modelle (Namen wie in assets/3d/manifest.json)
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">02</span>Arsenal</div>
+      <div>
+        <h2 class="sec-title">Jedes Modell aus dem Spiel, zum Anfassen.</h2>
+        <p class="lead">Ein Satz zu Einheiten, Schiffen und Gebäuden.</p>
+      </div>
+    </div>
+    <div class="hangar" data-keys="juggernaut,tank,artillery,sentinel,fighter,bomber,missile_frigate,battlecruiser,colony_ship,command_center,plasma_cannon,shield_generator" data-start="juggernaut">
+      <div class="hangar-side">
+        <span class="label d-block mb-3">Auswahl</span>
+        <ul class="hangar-list"></ul>
+      </div>
+      <div class="model-view" id="hangar-start" data-spin="0.3"></div>
+      <div class="hangar-info"><div class="hangar-specs"></div></div>
+    </div>
+    <div class="d-flex flex-wrap justify-content-between gap-3 mt-3">
+      <span class="drag-hint">Ziehen zum Drehen · Werte aus der aktuellen Spielversion</span>
+      <a class="link arrow" href="combat.html">Ganzes Arsenal</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     03 FEATURES – Bilder: img/start/feature-1.jpg … feature-4.jpg (4:3, 800×600)
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">03</span>Features</div>
+      <h2 class="sec-title">Was dich erwartet.</h2>
+    </div>
+    <div class="cols" style="--n: 4">
+      <div>
+        <span class="num">03.1</span>
+        <div class="media r-43 bg-slot" data-bg="img/start/feature-1.jpg" role="img" aria-label="Feature 1"></div>
+        <h3>Eigener Planet</h3>
+        <p>Kurze Beschreibung des Features in ein bis zwei Sätzen.</p>
+      </div>
+      <div>
+        <span class="num">03.2</span>
+        <div class="media r-43 bg-slot" data-bg="img/start/feature-2.jpg" role="img" aria-label="Feature 2"></div>
+        <h3>Ressourcen überall</h3>
+        <p>Kurze Beschreibung des Features in ein bis zwei Sätzen.</p>
+      </div>
+      <div>
+        <span class="num">03.3</span>
+        <div class="media r-43 bg-slot" data-bg="img/start/feature-3.jpg" role="img" aria-label="Feature 3"></div>
+        <h3>Boden, Orbit, All</h3>
+        <p>Kurze Beschreibung des Features in ein bis zwei Sätzen.</p>
+      </div>
+      <div>
+        <span class="num">03.4</span>
+        <div class="media r-43 bg-slot" data-bg="img/start/feature-4.jpg" role="img" aria-label="Feature 4"></div>
+        <h3>Mehrspieler</h3>
+        <p>Kurze Beschreibung des Features in ein bis zwei Sätzen.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     ZITAT – Hintergrund: img/start/parallax.jpg (1920×1080)
+     ================================================================ -->
+<section class="band bg-slot shade" data-bg="img/start/parallax.jpg">
+  <div class="container">
+    <p class="quote">Ein starker Satz oder Slogan über das Spiel.</p>
+    <p class="label mt-4 mb-0">— Name oder Quelle</p>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     04 TRAILER – Vorschaubild: img/start/trailer.jpg (16:9, 1920×1080)
+     Echtes Video: den <a class="video …"> ersetzen durch
+       <div class="ratio ratio-16x9"><iframe src="https://www.youtube-nocookie.com/embed/VIDEO-ID"
+            title="Trailer" allowfullscreen></iframe></div>
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">04</span>Trailer</div>
+      <h2 class="sec-title">Sieh es dir in Bewegung an.</h2>
+    </div>
+    <figure class="fig">
+      <a class="video media r-video bg-slot shade" data-bg="img/start/trailer.jpg" href="#"><span class="play">Trailer abspielen</span></a>
+      <figcaption><b>Video</b>Länge · Datum</figcaption>
+    </figure>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     05 SCREENSHOTS – img/start/screenshot-1.jpg … screenshot-7.jpg (16:9, mind. 1280×720)
+     Größen: g-big = 2×2, g-wide = 2 breit, g-tall = 2 hoch
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">05</span>Screenshots</div>
+      <h2 class="sec-title">Aus dem Spiel.</h2>
+    </div>
+    <div class="gallery">
+      <div class="g-big bg-slot" data-bg="img/start/screenshot-1.jpg" role="img" aria-label="Screenshot 1"></div>
+      <div class="bg-slot" data-bg="img/start/screenshot-2.jpg" role="img" aria-label="Screenshot 2"></div>
+      <div class="bg-slot" data-bg="img/start/screenshot-3.jpg" role="img" aria-label="Screenshot 3"></div>
+      <div class="bg-slot" data-bg="img/start/screenshot-4.jpg" role="img" aria-label="Screenshot 4"></div>
+      <div class="bg-slot" data-bg="img/start/screenshot-5.jpg" role="img" aria-label="Screenshot 5"></div>
+      <div class="g-wide bg-slot" data-bg="img/start/screenshot-6.jpg" role="img" aria-label="Screenshot 6"></div>
+      <div class="g-wide bg-slot" data-bg="img/start/screenshot-7.jpg" role="img" aria-label="Screenshot 7"></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     06 NEUIGKEITEN – Vorschaubilder: img/start/news-1.jpg … news-3.jpg (16:10, 640×400)
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">06</span>Neuigkeiten</div>
+      <h2 class="sec-title">Zuletzt passiert.</h2>
+    </div>
+    <ul class="rows">
+      <li>
+        <a class="row-link has-thumb" href="#">
+          <span class="num">06.1</span>
+          <span class="thumb bg-slot" data-bg="img/start/news-1.jpg"></span>
+          <div><h3>Titel der Neuigkeit</h3><p>Ein Satz Vorschau auf den Beitrag.</p></div>
+          <span class="meta">01.01.2026 <span class="go ms-3"></span></span>
+        </a>
+      </li>
+      <li>
+        <a class="row-link has-thumb" href="#">
+          <span class="num">06.2</span>
+          <span class="thumb bg-slot" data-bg="img/start/news-2.jpg"></span>
+          <div><h3>Titel der Neuigkeit</h3><p>Ein Satz Vorschau auf den Beitrag.</p></div>
+          <span class="meta">01.01.2026 <span class="go ms-3"></span></span>
+        </a>
+      </li>
+      <li>
+        <a class="row-link has-thumb" href="#">
+          <span class="num">06.3</span>
+          <span class="thumb bg-slot" data-bg="img/start/news-3.jpg"></span>
+          <div><h3>Titel der Neuigkeit</h3><p>Ein Satz Vorschau auf den Beitrag.</p></div>
+          <span class="meta">01.01.2026 <span class="go ms-3"></span></span>
+        </a>
+      </li>
+    </ul>
+    <a class="link arrow mt-4" href="entwicklung.html#devlog">Alle Devlogs</a>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     ABSCHLUSS – Hintergrund: img/shared/cta.jpg (1920×800)
+     ================================================================ -->
+<section class="band bg-slot shade-left" data-bg="img/shared/cta.jpg">
+  <div class="container">
+    <h2 class="sec-title mb-3">Bereit für deinen eigenen Planeten?</h2>
+    <p class="lead dim mb-4">Ein Satz, der zum Download motiviert.</p>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-signal arrow" href="download.html">Herunterladen</a>
+      <a class="btn btn-line" href="community.html">Zur Community</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ================================================================
+     FOOTER
+     ================================================================ -->
+<footer class="cc-footer">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <p class="dim mb-0" style="max-width: 24em">Ein Satz über das Spiel – zum Beispiel euer Slogan.</p>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2 offset-lg-1">
+        <h2 class="footer-title">Spiel</h2>
+        <ul class="footer-links">
+          <li><a href="index.html">Start</a></li>
+          <li><a href="download.html">Download</a></li>
+          <li><a href="erklaerung.html">Erklärung</a></li>
+          <li><a href="konzept.html">Konzept</a></li>
+          <li><a href="entwicklung.html">Entwicklung</a></li>
+          <li><a href="combat.html">Combat</a></li>
+          <li><a href="hosting.html">Hosting</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <h2 class="footer-title">Leute</h2>
+        <ul class="footer-links">
+          <li><a href="community.html">Community</a></li>
+          <li><a href="team.html">Team</a></li>
+          <li><a href="#">Kontakt</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <h2 class="footer-title">Kanäle</h2>
+        <ul class="footer-links">
+          <li><a href="#">Discord</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">YouTube</a></li>
+        </ul>
+      </div>
+    </div>
+    <svg class="wordmark" viewBox="0 0 1000 96" aria-hidden="true" focusable="false"><text x="0" y="92" textLength="1000" lengthAdjust="spacingAndGlyphs">COSMIC CONFLICT</text></svg>
+    <div class="footer-bottom">
+      <span>&copy; <span data-year>2026</span> Cosmic Conflict · [Team / Schule]</span>
+      <span>3D-Modelle aus dem Spiel, in Echtzeit gerendert</span>
+      <span><a href="#">Impressum</a> · <a href="#">Datenschutz</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="js/main.js"></script>
+<!-- 3D-Modelle (three.js) -->
+<script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  } }
+</script>
+<script type="module" src="js/showroom.js"></script>
+</body>
+</html>

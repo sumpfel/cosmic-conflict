@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="de" data-bs-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entwicklung · Cosmic Conflict</title>
+  <meta name="description" content="Wie Cosmic Conflict entsteht: Technik, Roadmap und Devlog.">
+  <meta name="theme-color" content="#0c0d0f">
+
+  <!-- Vorschau beim Teilen (Discord, WhatsApp …) – Bild: img/shared/og-image.jpg (1200×630) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Entwicklung · Cosmic Conflict">
+  <meta property="og:description" content="Wie Cosmic Conflict entsteht: Technik, Roadmap und Devlog.">
+  <meta property="og:image" content="img/shared/og-image.jpg">
+
+  <!-- Favicon: Platzhalter-Planet. Eigenes Icon: <link rel="icon" href="img/shared/favicon.png"> -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='17' fill='%23ebe7df'/%3E%3Cellipse cx='32' cy='32' rx='29' ry='8' fill='none' stroke='%23fa8c28' stroke-width='3' transform='rotate(-22 32 32)'/%3E%3C/svg%3E">
+
+  <!-- Schriften: Archivo (Text + Überschriften, variable Breite) und IBM Plex Mono (Daten) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+  <!-- Bootstrap 5.3 (Raster, Navigation) + Bootstrap Icons (nur Plattform-/Social-Logos) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Eigenes Stylesheet (immer als Letztes) -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-entwicklung">
+<a class="visually-hidden-focusable skip-link" href="#inhalt">Zum Inhalt springen</a>
+
+<!-- ================================================================
+     NAVIGATION (auf allen Seiten gleich – Änderungen in jede Datei übernehmen)
+     ================================================================ -->
+<nav class="navbar navbar-expand-lg fixed-top cc-nav" aria-label="Hauptnavigation">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">
+      <!-- Logo: img/shared/logo.png (quadratisch, mind. 128×128, transparent) -->
+      <span class="brand-mark bg-slot slot-nolabel" data-bg="img/shared/logo.png" aria-hidden="true"></span>
+      Cosmic Conflict
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Menü öffnen">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Start</a></li>
+        <li class="nav-item"><a class="nav-link" href="download.html">Download</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle active" href="erklaerung.html" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">Erklärung</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="erklaerung.html"><span class="num">00</span>Übersicht</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="konzept.html"><span class="num">01</span>Konzept</a></li>
+            <li><a class="dropdown-item active" aria-current="page" href="entwicklung.html"><span class="num">02</span>Entwicklung</a></li>
+            <li><a class="dropdown-item" href="combat.html"><span class="num">03</span>Combat</a></li>
+            <li><a class="dropdown-item" href="hosting.html"><span class="num">04</span>Hosting</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="community.html">Community</a></li>
+        <li class="nav-item"><a class="nav-link" href="team.html">Team</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main id="inhalt">
+
+<!-- ================================================================
+     SEITENKOPF – Hintergrund: img/entwicklung/hero.jpg (1920×900) · Modell rechts
+     ================================================================ -->
+<header class="phead bg-slot shade-head" data-bg="img/entwicklung/hero.jpg">
+  <div class="container">
+    <div class="phead-grid">
+      <div class="phead-copy">
+        <nav class="crumbs" aria-label="Brotkrümelnavigation"><a href="index.html">Start</a><span>/</span><a href="erklaerung.html">Erklärung</a><span>/</span><span aria-current="page">Entwicklung</span></nav>
+        <h1>Entwicklung</h1>
+        <p class="lead">Kurzer Einleitungstext zur Entwicklung.</p>
+      </div>
+      <div class="model-view" data-model="research_lab" data-spin="0.2" data-pitch="22"></div>
+    </div>
+  </div>
+</header>
+
+
+<!-- ================================================================
+     ZAHLEN
+     ================================================================ -->
+<section class="sec-tight">
+  <div class="container">
+    <div class="figures">
+      <div><strong>0</strong><span>Zeilen Code</span></div>
+      <div><strong>0</strong><span>Commits</span></div>
+      <div><strong>40</strong><span>3D-Modelle</span></div>
+      <div><strong>0</strong><span>Tests</span></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     01 TECHNIK
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">01</span>Technik</div>
+      <h2 class="sec-title">Womit wir bauen.</h2>
+    </div>
+    <div class="split align-items-start">
+      <div class="prose">
+        <p>Ein Absatz zum Technik-Stack: Warum diese Sprache, warum diese Engine?</p>
+        <p>Ein Absatz zur Zusammenarbeit im Team (Git, Aufgabenverteilung …).</p>
+      </div>
+      <dl class="spec">
+        <div><dt>Sprache</dt><dd>–</dd></div>
+        <div><dt>Engine</dt><dd>–</dd></div>
+        <div><dt>3D-Modelle</dt><dd>–</dd></div>
+        <div><dt>Netzwerk</dt><dd>–</dd></div>
+        <div><dt>Werkzeuge</dt><dd>–</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     02 ASSET-PIPELINE – Modell mit Umschalter Textur / Clay / Drahtgitter
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">02</span>Asset-Pipeline</div>
+      <h2 class="sec-title">Vom Drahtgitter zum fertigen Modell.</h2>
+    </div>
+    <div class="split">
+      <figure class="fig">
+        <div class="model-view" id="pipe-view" data-model="juggernaut" data-spin="0.25"></div>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
+          <div class="modes" role="group" aria-label="Darstellung">
+            <button type="button" data-view-mode="pbr" data-for="pipe-view" aria-pressed="true">Textur</button>
+            <button type="button" data-view-mode="clay" data-for="pipe-view" aria-pressed="false">Clay</button>
+            <button type="button" data-view-mode="wire" data-for="pipe-view" aria-pressed="false">Drahtgitter</button>
+          </div>
+          <span class="drag-hint"><span data-model-name="pipe-view">Juggernaut</span> · ziehen zum Drehen</span>
+        </div>
+      </figure>
+      <div>
+        <div class="prose"><p>Ein Absatz dazu, wie die Modelle entstehen.</p></div>
+        <ul class="ticks">
+          <li>Schritt 1 der Pipeline</li>
+          <li>Schritt 2 der Pipeline</li>
+          <li>Schritt 3 der Pipeline</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     03 ARCHITEKTUR – Bild: img/entwicklung/architektur.png (21:9, 2100×900)
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">03</span>Architektur</div>
+      <h2 class="sec-title">Wie die Teile zusammenhängen.</h2>
+    </div>
+    <figure class="fig">
+      <div class="media r-wide bg-slot" data-bg="img/entwicklung/architektur.png" role="img" aria-label="Architektur-Diagramm"></div>
+      <figcaption><b>Abb. 01</b>Bildunterschrift zum Diagramm</figcaption>
+    </figure>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     04 ROADMAP – Bild: img/entwicklung/roadmap.jpg (4:5, 960×1200)
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">04</span>Roadmap</div>
+      <h2 class="sec-title">Was war, was kommt.</h2>
+    </div>
+    <div class="split align-items-start">
+      <ol class="timeline">
+        <li><span class="when">Zeitraum</span><div><h3>Phase 1 – Titel</h3><p>Was in dieser Phase passiert ist.</p></div><span class="tag tag-done">Fertig</span></li>
+        <li><span class="when">Zeitraum</span><div><h3>Phase 2 – Titel</h3><p>Was in dieser Phase passiert ist.</p></div><span class="tag tag-done">Fertig</span></li>
+        <li><span class="when">Zeitraum</span><div><h3>Phase 3 – Titel</h3><p>Woran gerade gearbeitet wird.</p></div><span class="tag tag-signal">Läuft</span></li>
+        <li class="is-planned"><span class="when">Zeitraum</span><div><h3>Phase 4 – Titel</h3><p>Was geplant ist.</p></div><span class="tag">Geplant</span></li>
+        <li class="is-planned"><span class="when">Zeitraum</span><div><h3>Phase 5 – Titel</h3><p>Was geplant ist.</p></div><span class="tag">Geplant</span></li>
+      </ol>
+      <figure class="fig">
+        <div class="media r-portrait bg-slot" data-bg="img/entwicklung/roadmap.jpg" role="img" aria-label="Aktueller Stand"></div>
+        <figcaption><b>Abb. 02</b>Aktueller Stand</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     05 DEVLOG – Vorschaubilder: img/entwicklung/devlog-1.jpg … devlog-3.jpg (16:10, 640×400)
+     ================================================================ -->
+<section class="sec" id="devlog">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">05</span>Devlog</div>
+      <h2 class="sec-title">Aus dem Entwicklertagebuch.</h2>
+    </div>
+    <ul class="rows">
+      <li><a class="row-link has-thumb" href="#"><span class="num">05.1</span><span class="thumb bg-slot" data-bg="img/entwicklung/devlog-1.jpg"></span><div><h3>Titel des Eintrags</h3><p>Kurze Zusammenfassung.</p></div><span class="meta">01.01.2026 <span class="go ms-3"></span></span></a></li>
+      <li><a class="row-link has-thumb" href="#"><span class="num">05.2</span><span class="thumb bg-slot" data-bg="img/entwicklung/devlog-2.jpg"></span><div><h3>Titel des Eintrags</h3><p>Kurze Zusammenfassung.</p></div><span class="meta">01.01.2026 <span class="go ms-3"></span></span></a></li>
+      <li><a class="row-link has-thumb" href="#"><span class="num">05.3</span><span class="thumb bg-slot" data-bg="img/entwicklung/devlog-3.jpg"></span><div><h3>Titel des Eintrags</h3><p>Kurze Zusammenfassung.</p></div><span class="meta">01.01.2026 <span class="go ms-3"></span></span></a></li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     06 CONCEPT ART – Bilder: img/entwicklung/concept-1.jpg … concept-4.jpg (4:3, 1200×900)
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">06</span>Galerie</div>
+      <div>
+        <h2 class="sec-title">Concept Art und Fortschritt.</h2>
+        <p class="lead">Ein Satz zur Galerie, z. B. Vorher-Nachher-Vergleiche.</p>
+      </div>
+    </div>
+    <div class="row g-3">
+      <figure class="col-6 col-lg-3 m-0"><div class="media r-43 bg-slot" data-bg="img/entwicklung/concept-1.jpg" role="img" aria-label="Concept Art 1"></div><figcaption class="figcap"><b>06.1</b>Bildunterschrift</figcaption></figure>
+      <figure class="col-6 col-lg-3 m-0"><div class="media r-43 bg-slot" data-bg="img/entwicklung/concept-2.jpg" role="img" aria-label="Concept Art 2"></div><figcaption class="figcap"><b>06.2</b>Bildunterschrift</figcaption></figure>
+      <figure class="col-6 col-lg-3 m-0"><div class="media r-43 bg-slot" data-bg="img/entwicklung/concept-3.jpg" role="img" aria-label="Concept Art 3"></div><figcaption class="figcap"><b>06.3</b>Bildunterschrift</figcaption></figure>
+      <figure class="col-6 col-lg-3 m-0"><div class="media r-43 bg-slot" data-bg="img/entwicklung/concept-4.jpg" role="img" aria-label="Concept Art 4"></div><figcaption class="figcap"><b>06.4</b>Bildunterschrift</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     QUELLCODE – Hintergrund: img/shared/cta.jpg
+     ================================================================ -->
+<section class="band bg-slot shade-left" data-bg="img/shared/cta.jpg">
+  <div class="container">
+    <h2 class="sec-title mb-3">Wirf einen Blick in den Code.</h2>
+    <p class="lead dim mb-4">Ein Satz zum Repository.</p>
+    <a class="btn btn-signal arrow" href="#"><i class="bi bi-github"></i>Zum Repository</a>
+  </div>
+</section>
+</main>
+
+<!-- ================================================================
+     FOOTER
+     ================================================================ -->
+<footer class="cc-footer">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <p class="dim mb-0" style="max-width: 24em">Ein Satz über das Spiel – zum Beispiel euer Slogan.</p>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2 offset-lg-1">
+        <h2 class="footer-title">Spiel</h2>
+        <ul class="footer-links">
+          <li><a href="index.html">Start</a></li>
+          <li><a href="download.html">Download</a></li>
+          <li><a href="erklaerung.html">Erklärung</a></li>
+          <li><a href="konzept.html">Konzept</a></li>
+          <li><a href="entwicklung.html">Entwicklung</a></li>
+          <li><a href="combat.html">Combat</a></li>
+          <li><a href="hosting.html">Hosting</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <h2 class="footer-title">Leute</h2>
+        <ul class="footer-links">
+          <li><a href="community.html">Community</a></li>
+          <li><a href="team.html">Team</a></li>
+          <li><a href="#">Kontakt</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <h2 class="footer-title">Kanäle</h2>
+        <ul class="footer-links">
+          <li><a href="#">Discord</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">YouTube</a></li>
+        </ul>
+      </div>
+    </div>
+    <svg class="wordmark" viewBox="0 0 1000 96" aria-hidden="true" focusable="false"><text x="0" y="92" textLength="1000" lengthAdjust="spacingAndGlyphs">COSMIC CONFLICT</text></svg>
+    <div class="footer-bottom">
+      <span>&copy; <span data-year>2026</span> Cosmic Conflict · [Team / Schule]</span>
+      <span>3D-Modelle aus dem Spiel, in Echtzeit gerendert</span>
+      <span><a href="#">Impressum</a> · <a href="#">Datenschutz</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="js/main.js"></script>
+<!-- 3D-Modelle (three.js) -->
+<script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  } }
+</script>
+<script type="module" src="js/showroom.js"></script>
+</body>
+</html>

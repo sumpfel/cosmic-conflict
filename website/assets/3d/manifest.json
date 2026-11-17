@@ -1,0 +1,1222 @@
+{
+ "models": [
+  {
+   "key": "drone",
+   "name": "Drone",
+   "category": "ground",
+   "hp": 40.0,
+   "speed": 7.0,
+   "cost": {
+    "metal": 50
+   },
+   "categoryLabel": "Bodeneinheit",
+   "ao": true,
+   "kb": 441
+  },
+  {
+   "key": "trooper",
+   "name": "Trooper",
+   "category": "ground",
+   "hp": 60.0,
+   "speed": 5.0,
+   "cost": {
+    "metal": 60
+   },
+   "weapon": {
+    "damage": 6.0,
+    "range": 14.0,
+    "cooldown": 1.0,
+    "ground": true,
+    "space": false,
+    "kind": "Kinetic"
+   },
+   "categoryLabel": "Bodeneinheit",
+   "ao": true,
+   "kb": 266
+  },
+  {
+   "key": "lancer",
+   "name": "Lancer",
+   "category": "ground",
+   "hp": 70.0,
+   "speed": 4.8,
+   "cost": {
+    "metal": 80,
+    "crystal": 30
+   },
+   "weapon": {
+    "damage": 22.0,
+    "range": 26.0,
+    "cooldown": 2.4,
+    "ground": true,
+    "space": true,
+    "kind": "Explosive"
+   },
+   "categoryLabel": "Bodeneinheit",
+   "ao": true,
+   "kb": 247
+  },
+  {
+   "key": "scout_rover",
+   "name": "Scout Rover",
+   "category": "ground",
+   "hp": 70.0,
+   "speed": 9.5,
+   "cost": {
+    "metal": 70
+   },
+   "weapon": {
+    "damage": 3.0,
+    "range": 12.0,
+    "cooldown": 0.6,
+    "ground": true,
+    "space": false,
+    "kind": "Kinetic"
+   },
+   "categoryLabel": "Bodeneinheit",
+   "ao": true,
+   "kb": 331
+  },
+  {
+   "key": "tank",
+   "name": "Hover Tank",
+   "category": "ground",
+   "hp": 260.0,
+   "speed": 4.0,
+   "cost": {
+    "metal": 150,
+    "gas": 25
+   },
+   "weapon": {
+    "damage": 28.0,
+    "range": 20.0,
+    "cooldown": 2.2,
+    "ground": true,
+    "space": false,
+    "kind": "Kinetic"
+   },
+   "categoryLabel": "Bodeneinheit",
+   "ao": true,
+   "kb": 584
+  },
+  {
+   "key": "flak",
+   "name": "Flak Walker",
+   "category": "ground",
+   "hp": 120.0,
+   "speed": 4.5,
+   "cost": {
+    "metal": 100,
+    "crystal": 25
+   },
+   "weapon": {
+    "damage": 11.0,
+    "range": 42.0,
+    "cooldown": 1.1,
+    "ground": false,
+    "space": true,
+    "kind": "Explosive"
+   },
+   "categoryLabel": "Bodeneinheit",
+   "ao": true,
+   "kb": 371
+  },
+  {
+   "key": "artillery",
+   "name": "Siege Mortar",
+   "category": "ground",
+   "hp": 180.0,
+   "speed": 3.0,
+   "cost": {
+    "metal": 180,
+    "crystal": 60,
+    "gas": 30
+   },
+   "weapon": {
+    "damage": 40.0,
+    "range": 55.0,
+    "cooldown": 4.5,
+    "ground": true,
+    "space": false,
+    "kind": "Explosive"
+   },
+   "categoryLabel": "Bodeneinheit",
+   "ao": true,
+   "kb": 324
+  },
+  {
+   "key": "sentinel",
+   "name": "Sentinel",
+   "category": "ground",
+   "hp": 180.0,
+   "speed": 5.0,
+   "cost": {
+    "metal": 120,
+    "crystal": 50
+   },
+   "weapon": {
+    "damage": 12.0,
+    "range": 22.0,
+    "cooldown": 1.0,
+    "ground": true,
+    "space": true,
+    "kind": "Laser"
+   },
+   "categoryLabel": "Bodeneinheit",
+   "ao": true,
+   "kb": 297
+  },
+  {
+   "key": "repair_bot",
+   "name": "Mender",
+   "category": "ground",
+   "hp": 90.0,
+   "speed": 6.0,
+   "cost": {
+    "metal": 90,
+    "crystal": 60
+   },
+   "categoryLabel": "Bodeneinheit",
+   "ao": true,
+   "kb": 229
+  },
+  {
+   "key": "infiltrator",
+   "name": "Wraith Infiltrator",
+   "category": "ground",
+   "hp": 60.0,
+   "speed": 8.0,
+   "cost": {
+    "metal": 100,
+    "crystal": 80,
+    "gas": 20
+   },
+   "weapon": {
+    "damage": 8.0,
+    "range": 14.0,
+    "cooldown": 1.2,
+    "ground": true,
+    "space": false,
+    "kind": "Laser"
+   },
+   "categoryLabel": "Bodeneinheit",
+   "ao": true,
+   "kb": 202
+  },
+  {
+   "key": "juggernaut",
+   "name": "Juggernaut",
+   "category": "ground",
+   "hp": 700.0,
+   "speed": 2.8,
+   "cost": {
+    "metal": 400,
+    "crystal": 200,
+    "gas": 120
+   },
+   "weapon": {
+    "damage": 60.0,
+    "range": 24.0,
+    "cooldown": 2.6,
+    "ground": true,
+    "space": false,
+    "kind": "Plasma"
+   },
+   "categoryLabel": "Bodeneinheit",
+   "ao": true,
+   "kb": 430
+  },
+  {
+   "key": "probe",
+   "name": "Recon Probe",
+   "category": "ship",
+   "hp": 45.0,
+   "speed": 60.0,
+   "cost": {
+    "metal": 60,
+    "crystal": 20
+   },
+   "categoryLabel": "Raumschiff",
+   "ao": true,
+   "kb": 164
+  },
+  {
+   "key": "fighter",
+   "name": "Fighter",
+   "category": "ship",
+   "hp": 90.0,
+   "speed": 45.0,
+   "cost": {
+    "metal": 100,
+    "crystal": 40
+   },
+   "weapon": {
+    "damage": 9.0,
+    "range": 30.0,
+    "cooldown": 0.8,
+    "ground": true,
+    "space": true,
+    "kind": "Laser"
+   },
+   "categoryLabel": "Raumschiff",
+   "ao": true,
+   "kb": 213
+  },
+  {
+   "key": "bomber",
+   "name": "Orbital Bomber",
+   "category": "ship",
+   "hp": 260.0,
+   "speed": 26.0,
+   "cost": {
+    "metal": 200,
+    "crystal": 80,
+    "gas": 40
+   },
+   "weapon": {
+    "damage": 45.0,
+    "range": 42.0,
+    "cooldown": 3.0,
+    "ground": true,
+    "space": false,
+    "kind": "Explosive"
+   },
+   "categoryLabel": "Raumschiff",
+   "ao": true,
+   "kb": 352
+  },
+  {
+   "key": "missile_frigate",
+   "name": "Missile Frigate",
+   "category": "ship",
+   "hp": 360.0,
+   "speed": 20.0,
+   "cost": {
+    "metal": 260,
+    "crystal": 120,
+    "gas": 40
+   },
+   "weapon": {
+    "damage": 30.0,
+    "range": 52.0,
+    "cooldown": 2.6,
+    "ground": true,
+    "space": true,
+    "kind": "Explosive"
+   },
+   "categoryLabel": "Raumschiff",
+   "ao": true,
+   "kb": 356
+  },
+  {
+   "key": "ion_frigate",
+   "name": "Ion Disruptor",
+   "category": "ship",
+   "hp": 300.0,
+   "speed": 24.0,
+   "cost": {
+    "metal": 220,
+    "crystal": 160,
+    "gas": 60
+   },
+   "weapon": {
+    "damage": 34.0,
+    "range": 36.0,
+    "cooldown": 1.8,
+    "ground": true,
+    "space": true,
+    "kind": "Ion"
+   },
+   "categoryLabel": "Raumschiff",
+   "ao": true,
+   "kb": 344
+  },
+  {
+   "key": "surveyor",
+   "name": "Surveyor",
+   "category": "ship",
+   "hp": 160.0,
+   "speed": 18.0,
+   "cost": {
+    "metal": 150,
+    "crystal": 120,
+    "gas": 30
+   },
+   "categoryLabel": "Raumschiff",
+   "ao": true,
+   "kb": 243
+  },
+  {
+   "key": "battlecruiser",
+   "name": "Battlecruiser",
+   "category": "ship",
+   "hp": 1800.0,
+   "speed": 12.0,
+   "cost": {
+    "metal": 800,
+    "crystal": 400,
+    "gas": 250
+   },
+   "weapon": {
+    "damage": 90.0,
+    "range": 48.0,
+    "cooldown": 3.0,
+    "ground": true,
+    "space": true,
+    "kind": "Plasma"
+   },
+   "categoryLabel": "Raumschiff",
+   "ao": true,
+   "kb": 674
+  },
+  {
+   "key": "colony_ship",
+   "name": "Colony Ship",
+   "category": "ship",
+   "hp": 200.0,
+   "speed": 22.0,
+   "cost": {
+    "metal": 300,
+    "crystal": 100,
+    "gas": 100
+   },
+   "categoryLabel": "Raumschiff",
+   "ao": true,
+   "kb": 706
+  },
+  {
+   "key": "command_center",
+   "name": "Command Center",
+   "category": "economy",
+   "hp": 2000.0,
+   "cost": {
+    "metal": 400,
+    "crystal": 100
+   },
+   "categoryLabel": "Wirtschaft",
+   "ao": true,
+   "kb": 670
+  },
+  {
+   "key": "outpost",
+   "name": "Outpost",
+   "category": "economy",
+   "hp": 900.0,
+   "categoryLabel": "Wirtschaft",
+   "ao": true,
+   "kb": 257
+  },
+  {
+   "key": "extractor",
+   "name": "Extractor",
+   "category": "economy",
+   "hp": 300.0,
+   "cost": {
+    "metal": 75
+   },
+   "categoryLabel": "Wirtschaft",
+   "ao": true,
+   "kb": 458
+  },
+  {
+   "key": "habitat",
+   "name": "Habitat Dome",
+   "category": "economy",
+   "hp": 400.0,
+   "cost": {
+    "metal": 100
+   },
+   "categoryLabel": "Wirtschaft",
+   "ao": true,
+   "kb": 455
+  },
+  {
+   "key": "factory",
+   "name": "Factory",
+   "category": "production",
+   "hp": 1000.0,
+   "cost": {
+    "metal": 200,
+    "crystal": 50
+   },
+   "categoryLabel": "Produktion",
+   "ao": true,
+   "kb": 285
+  },
+  {
+   "key": "robotics_bay",
+   "name": "Robotics Bay",
+   "category": "production",
+   "hp": 900.0,
+   "cost": {
+    "metal": 220,
+    "crystal": 100
+   },
+   "categoryLabel": "Produktion",
+   "ao": true,
+   "kb": 236
+  },
+  {
+   "key": "shipyard",
+   "name": "Orbital Shipyard",
+   "category": "production",
+   "hp": 1000.0,
+   "cost": {
+    "metal": 250,
+    "crystal": 150
+   },
+   "categoryLabel": "Produktion",
+   "ao": true,
+   "kb": 1191
+  },
+  {
+   "key": "research_lab",
+   "name": "Research Lab",
+   "category": "research",
+   "hp": 700.0,
+   "cost": {
+    "metal": 150,
+    "crystal": 100
+   },
+   "categoryLabel": "Forschung",
+   "ao": true,
+   "kb": 313
+  },
+  {
+   "key": "turret",
+   "name": "Defence Turret",
+   "category": "defence",
+   "hp": 600.0,
+   "cost": {
+    "metal": 120,
+    "crystal": 40
+   },
+   "weapon": {
+    "damage": 14.0,
+    "range": 30.0,
+    "cooldown": 1.0,
+    "ground": true,
+    "space": true,
+    "kind": "Kinetic"
+   },
+   "categoryLabel": "Verteidigung",
+   "ao": true,
+   "kb": 202
+  },
+  {
+   "key": "laser_turret",
+   "name": "Laser Turret",
+   "category": "defence",
+   "hp": 500.0,
+   "cost": {
+    "metal": 130,
+    "crystal": 70
+   },
+   "weapon": {
+    "damage": 9.0,
+    "range": 28.0,
+    "cooldown": 0.5,
+    "ground": true,
+    "space": true,
+    "kind": "Laser"
+   },
+   "categoryLabel": "Verteidigung",
+   "ao": true,
+   "kb": 231
+  },
+  {
+   "key": "missile_battery",
+   "name": "Missile Battery",
+   "category": "defence",
+   "hp": 650.0,
+   "cost": {
+    "metal": 180,
+    "crystal": 90,
+    "gas": 20
+   },
+   "weapon": {
+    "damage": 36.0,
+    "range": 64.0,
+    "cooldown": 3.2,
+    "ground": false,
+    "space": true,
+    "kind": "Explosive"
+   },
+   "categoryLabel": "Verteidigung",
+   "ao": true,
+   "kb": 216
+  },
+  {
+   "key": "bunker",
+   "name": "Bunker",
+   "category": "defence",
+   "hp": 1600.0,
+   "cost": {
+    "metal": 200,
+    "crystal": 40
+   },
+   "weapon": {
+    "damage": 10.0,
+    "range": 20.0,
+    "cooldown": 0.7,
+    "ground": true,
+    "space": false,
+    "kind": "Kinetic"
+   },
+   "categoryLabel": "Verteidigung",
+   "ao": true,
+   "kb": 215
+  },
+  {
+   "key": "plasma_cannon",
+   "name": "Plasma Cannon",
+   "category": "defence",
+   "hp": 1100.0,
+   "cost": {
+    "metal": 300,
+    "crystal": 200,
+    "gas": 100
+   },
+   "weapon": {
+    "damage": 85.0,
+    "range": 46.0,
+    "cooldown": 3.5,
+    "ground": true,
+    "space": false,
+    "kind": "Plasma"
+   },
+   "categoryLabel": "Verteidigung",
+   "ao": true,
+   "kb": 462
+  },
+  {
+   "key": "shield_generator",
+   "name": "Shield Generator",
+   "category": "defence",
+   "hp": 600.0,
+   "cost": {
+    "metal": 200,
+    "crystal": 180,
+    "gas": 40
+   },
+   "categoryLabel": "Verteidigung",
+   "ao": true,
+   "kb": 533
+  },
+  {
+   "key": "radar_station",
+   "name": "Radar Station",
+   "category": "sensors",
+   "hp": 400.0,
+   "cost": {
+    "metal": 100,
+    "crystal": 30
+   },
+   "categoryLabel": "Sensoren",
+   "ao": true,
+   "kb": 422
+  },
+  {
+   "key": "seismic_sensor",
+   "name": "Seismic Sensor",
+   "category": "sensors",
+   "hp": 300.0,
+   "cost": {
+    "metal": 90,
+    "crystal": 60
+   },
+   "categoryLabel": "Sensoren",
+   "ao": true,
+   "kb": 203
+  },
+  {
+   "key": "deep_space_array",
+   "name": "Deep-Space Array",
+   "category": "sensors",
+   "hp": 700.0,
+   "cost": {
+    "metal": 250,
+    "crystal": 200,
+    "gas": 40
+   },
+   "categoryLabel": "Sensoren",
+   "ao": true,
+   "kb": 318
+  },
+  {
+   "key": "gravimetric_beacon",
+   "name": "Gravimetric Beacon",
+   "category": "sensors",
+   "hp": 350.0,
+   "cost": {
+    "metal": 120,
+    "crystal": 120
+   },
+   "categoryLabel": "Sensoren",
+   "ao": true,
+   "kb": 265
+  },
+  {
+   "key": "deposit_metal",
+   "name": "Metal Deposit",
+   "category": "deposit",
+   "categoryLabel": "Vorkommen",
+   "ao": true,
+   "kb": 373
+  },
+  {
+   "key": "deposit_crystal",
+   "name": "Crystal Deposit",
+   "category": "deposit",
+   "categoryLabel": "Vorkommen",
+   "ao": true,
+   "kb": 309
+  },
+  {
+   "key": "deposit_gas",
+   "name": "Gas Deposit",
+   "category": "deposit",
+   "categoryLabel": "Vorkommen",
+   "ao": true,
+   "kb": 137
+  }
+ ],
+ "materials": {
+  "Hull": {
+   "tex": "blue_metal_plate",
+   "tint": [
+    178,
+    182,
+    188
+   ],
+   "rough": 1.0,
+   "metal": 1.0,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Team": {
+   "tex": "green_metal_rust",
+   "tint": [
+    255,
+    255,
+    255
+   ],
+   "rough": 0.9,
+   "metal": 1.0,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": true,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Panel": {
+   "tex": "MetalPlates006",
+   "tint": [
+    235,
+    238,
+    242
+   ],
+   "rough": 1.0,
+   "metal": 0.75,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Metal": {
+   "tex": "Metal009",
+   "tint": [
+    235,
+    235,
+    235
+   ],
+   "rough": 1.0,
+   "metal": 1.0,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Dark": {
+   "tex": "Metal032",
+   "tint": [
+    112,
+    115,
+    122
+   ],
+   "rough": 1.0,
+   "metal": 0.85,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Rubber": {
+   "tex": "Rubber004",
+   "tint": [
+    150,
+    150,
+    150
+   ],
+   "rough": 1.0,
+   "metal": 0.0,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Hazard": {
+   "tex": "PaintedMetal016",
+   "tint": [
+    255,
+    255,
+    255
+   ],
+   "rough": 1.0,
+   "metal": 1.0,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Deck": {
+   "tex": "DiamondPlate008C",
+   "tint": [
+    190,
+    190,
+    190
+   ],
+   "rough": 1.0,
+   "metal": 1.0,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Concrete": {
+   "tex": "concrete_floor_worn_001",
+   "tint": [
+    215,
+    212,
+    205
+   ],
+   "rough": 1.0,
+   "metal": 0.0,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Facade": {
+   "tex": "concrete_wall_004",
+   "tint": [
+    222,
+    224,
+    226
+   ],
+   "rough": 1.0,
+   "metal": 0.0,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Sheet": {
+   "tex": "corrugated_iron_02",
+   "tint": [
+    170,
+    176,
+    184
+   ],
+   "rough": 1.0,
+   "metal": 1.0,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Rock": {
+   "tex": "dark_rock",
+   "tint": [
+    200,
+    196,
+    192
+   ],
+   "rough": 1.0,
+   "metal": 0.0,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "OreRock": {
+   "tex": "tiger_rock",
+   "tint": [
+    230,
+    220,
+    210
+   ],
+   "rough": 1.0,
+   "metal": 0.0,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Ore": {
+   "tex": "Metal062C",
+   "tint": [
+    205,
+    175,
+    140
+   ],
+   "rough": 0.9,
+   "metal": 1.0,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Glass": {
+   "tex": null,
+   "tint": [
+    18,
+    30,
+    42
+   ],
+   "rough": 0.05,
+   "metal": 0.0,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Window": {
+   "tex": null,
+   "tint": [
+    26,
+    32,
+    38
+   ],
+   "rough": 0.05,
+   "metal": 0.0,
+   "emissive": [
+    1.3,
+    1.0,
+    0.65
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Glow": {
+   "tex": null,
+   "tint": [
+    0,
+    0,
+    0
+   ],
+   "rough": 0.4,
+   "metal": 0.0,
+   "emissive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "team": false,
+   "teamGlow": true,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Engine": {
+   "tex": null,
+   "tint": [
+    0,
+    0,
+    0
+   ],
+   "rough": 0.4,
+   "metal": 0.0,
+   "emissive": [
+    3.0,
+    7.0,
+    14.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Light": {
+   "tex": null,
+   "tint": [
+    0,
+    0,
+    0
+   ],
+   "rough": 0.4,
+   "metal": 0.0,
+   "emissive": [
+    10.0,
+    8.0,
+    5.5
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Crystal": {
+   "tex": null,
+   "tint": [
+    26,
+    140,
+    190
+   ],
+   "rough": 0.06,
+   "metal": 0.0,
+   "emissive": [
+    0.1,
+    0.9,
+    1.4
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Gas": {
+   "tex": null,
+   "tint": [
+    0,
+    0,
+    0
+   ],
+   "rough": 0.4,
+   "metal": 0.0,
+   "emissive": [
+    1.5,
+    6.0,
+    1.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Haze": {
+   "tex": null,
+   "tint": [
+    128,
+    255,
+    102
+   ],
+   "rough": 1.0,
+   "metal": 0.0,
+   "emissive": [
+    0.1,
+    0.5,
+    0.08
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 0.12,
+   "additive": true
+  },
+  "Plasma": {
+   "tex": null,
+   "tint": [
+    0,
+    0,
+    0
+   ],
+   "rough": 0.4,
+   "metal": 0.0,
+   "emissive": [
+    14.0,
+    5.0,
+    1.2
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Laser": {
+   "tex": null,
+   "tint": [
+    0,
+    0,
+    0
+   ],
+   "rough": 0.4,
+   "metal": 0.0,
+   "emissive": [
+    12.0,
+    1.0,
+    0.8
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Ion": {
+   "tex": null,
+   "tint": [
+    0,
+    0,
+    0
+   ],
+   "rough": 0.4,
+   "metal": 0.0,
+   "emissive": [
+    7.0,
+    3.0,
+    16.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 1.0,
+   "additive": false
+  },
+  "Shield": {
+   "tex": null,
+   "tint": [
+    110,
+    170,
+    255
+   ],
+   "rough": 1.0,
+   "metal": 0.0,
+   "emissive": [
+    0.15,
+    0.4,
+    1.0
+   ],
+   "team": false,
+   "teamGlow": false,
+   "alpha": 0.1,
+   "additive": true
+  }
+ },
+ "playerColors": [
+  [
+   60,
+   140,
+   255
+  ],
+  [
+   235,
+   70,
+   60
+  ],
+  [
+   70,
+   210,
+   110
+  ],
+  [
+   245,
+   200,
+   50
+  ],
+  [
+   180,
+   90,
+   235
+  ],
+  [
+   40,
+   215,
+   215
+  ],
+  [
+   250,
+   140,
+   40
+  ],
+  [
+   235,
+   235,
+   235
+  ]
+ ]
+}

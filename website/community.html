@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="de" data-bs-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Community · Cosmic Conflict</title>
+  <meta name="description" content="Die Community von Cosmic Conflict: Discord, Events, Fan-Galerie und Regeln.">
+  <meta name="theme-color" content="#0c0d0f">
+
+  <!-- Vorschau beim Teilen (Discord, WhatsApp …) – Bild: img/shared/og-image.jpg (1200×630) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Community · Cosmic Conflict">
+  <meta property="og:description" content="Die Community von Cosmic Conflict: Discord, Events, Fan-Galerie und Regeln.">
+  <meta property="og:image" content="img/shared/og-image.jpg">
+
+  <!-- Favicon: Platzhalter-Planet. Eigenes Icon: <link rel="icon" href="img/shared/favicon.png"> -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='17' fill='%23ebe7df'/%3E%3Cellipse cx='32' cy='32' rx='29' ry='8' fill='none' stroke='%23fa8c28' stroke-width='3' transform='rotate(-22 32 32)'/%3E%3C/svg%3E">
+
+  <!-- Schriften: Archivo (Text + Überschriften, variable Breite) und IBM Plex Mono (Daten) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+  <!-- Bootstrap 5.3 (Raster, Navigation) + Bootstrap Icons (nur Plattform-/Social-Logos) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Eigenes Stylesheet (immer als Letztes) -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-community">
+<a class="visually-hidden-focusable skip-link" href="#inhalt">Zum Inhalt springen</a>
+
+<!-- ================================================================
+     NAVIGATION (auf allen Seiten gleich – Änderungen in jede Datei übernehmen)
+     ================================================================ -->
+<nav class="navbar navbar-expand-lg fixed-top cc-nav" aria-label="Hauptnavigation">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">
+      <!-- Logo: img/shared/logo.png (quadratisch, mind. 128×128, transparent) -->
+      <span class="brand-mark bg-slot slot-nolabel" data-bg="img/shared/logo.png" aria-hidden="true"></span>
+      Cosmic Conflict
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Menü öffnen">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Start</a></li>
+        <li class="nav-item"><a class="nav-link" href="download.html">Download</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="erklaerung.html" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">Erklärung</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="erklaerung.html"><span class="num">00</span>Übersicht</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="konzept.html"><span class="num">01</span>Konzept</a></li>
+            <li><a class="dropdown-item" href="entwicklung.html"><span class="num">02</span>Entwicklung</a></li>
+            <li><a class="dropdown-item" href="combat.html"><span class="num">03</span>Combat</a></li>
+            <li><a class="dropdown-item" href="hosting.html"><span class="num">04</span>Hosting</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link active" aria-current="page" href="community.html">Community</a></li>
+        <li class="nav-item"><a class="nav-link" href="team.html">Team</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main id="inhalt">
+
+<!-- ================================================================
+     SEITENKOPF – Hintergrund: img/community/hero.jpg (1920×900) · Modell rechts
+     ================================================================ -->
+<header class="phead bg-slot shade-head" data-bg="img/community/hero.jpg">
+  <div class="container">
+    <div class="phead-grid">
+      <div class="phead-copy">
+        <nav class="crumbs" aria-label="Brotkrümelnavigation"><a href="index.html">Start</a><span>/</span><span aria-current="page">Community</span></nav>
+        <h1>Community</h1>
+        <p class="lead">Kurzer Einleitungstext zur Community.</p>
+      </div>
+      <div class="model-view" data-model="habitat" data-spin="0.18" data-pitch="24"></div>
+    </div>
+  </div>
+</header>
+
+
+<!-- ================================================================
+     01 KANÄLE – Links bei href="#" eintragen
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">01</span>Kanäle</div>
+      <h2 class="sec-title">Hier findest du uns.</h2>
+    </div>
+    <ul class="rows">
+      <li><a class="row-link" href="#"><span class="num">01.1</span><div><h3><i class="bi bi-discord me-2"></i>Discord</h3><p>Wofür nutzt ihr diesen Kanal?</p></div><span class="meta">@name <span class="go ms-3"></span></span></a></li>
+      <li><a class="row-link" href="#"><span class="num">01.2</span><div><h3><i class="bi bi-github me-2"></i>GitHub</h3><p>Wofür nutzt ihr diesen Kanal?</p></div><span class="meta">@name <span class="go ms-3"></span></span></a></li>
+      <li><a class="row-link" href="#"><span class="num">01.3</span><div><h3><i class="bi bi-youtube me-2"></i>YouTube</h3><p>Wofür nutzt ihr diesen Kanal?</p></div><span class="meta">@name <span class="go ms-3"></span></span></a></li>
+      <li><a class="row-link" href="#"><span class="num">01.4</span><div><h3><i class="bi bi-instagram me-2"></i>Instagram</h3><p>Wofür nutzt ihr diesen Kanal?</p></div><span class="meta">@name <span class="go ms-3"></span></span></a></li>
+      <li><a class="row-link" href="#"><span class="num">01.5</span><div><h3><i class="bi bi-twitch me-2"></i>Twitch</h3><p>Wofür nutzt ihr diesen Kanal?</p></div><span class="meta">@name <span class="go ms-3"></span></span></a></li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     DISCORD – Hintergrund: img/community/discord.jpg (1920×900, Motiv rechts)
+     ================================================================ -->
+<section class="band bg-slot shade-left" data-bg="img/community/discord.jpg">
+  <div class="container">
+    <div style="max-width: 34rem">
+      <span class="label">Discord</span>
+      <h2 class="sec-title mt-2 mb-3">Unser Treffpunkt.</h2>
+      <p class="lead dim">Warum sollte man dem Discord beitreten?</p>
+      <ul class="ticks"><li>Grund 1</li><li>Grund 2</li><li>Grund 3</li></ul>
+      <a class="btn btn-signal arrow" href="#"><i class="bi bi-discord"></i>Server beitreten</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     02 EVENTS – Vorschaubilder: img/community/event-1.jpg … event-3.jpg (16:10, 640×400)
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">02</span>Events</div>
+      <h2 class="sec-title">Turniere und Spieleabende.</h2>
+    </div>
+    <ul class="rows">
+      <li><a class="row-link has-thumb" href="#"><span class="num">02.1</span><span class="thumb bg-slot" data-bg="img/community/event-1.jpg"></span><div><h3>Event-Titel</h3><p>Kurze Beschreibung · Ort / Online</p></div><span class="meta">01.01.2026 <span class="go ms-3"></span></span></a></li>
+      <li><a class="row-link has-thumb" href="#"><span class="num">02.2</span><span class="thumb bg-slot" data-bg="img/community/event-2.jpg"></span><div><h3>Event-Titel</h3><p>Kurze Beschreibung · Ort / Online</p></div><span class="meta">01.02.2026 <span class="go ms-3"></span></span></a></li>
+      <li><a class="row-link has-thumb" href="#"><span class="num">02.3</span><span class="thumb bg-slot" data-bg="img/community/event-3.jpg"></span><div><h3>Event-Titel</h3><p>Kurze Beschreibung · Ort / Online</p></div><span class="meta">01.03.2026 <span class="go ms-3"></span></span></a></li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     03 GALERIE – Bilder: img/community/fan-1.jpg … fan-8.jpg (beliebig, werden zugeschnitten)
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">03</span>Galerie</div>
+      <div>
+        <h2 class="sec-title">Aus der Community.</h2>
+        <p class="lead">Ein Satz, wie man eigene Screenshots einreichen kann.</p>
+      </div>
+    </div>
+    <div class="gallery">
+      <div class="g-tall bg-slot" data-bg="img/community/fan-1.jpg" role="img" aria-label="Community-Bild 1"></div>
+      <div class="g-wide bg-slot" data-bg="img/community/fan-2.jpg" role="img" aria-label="Community-Bild 2"></div>
+      <div class="g-tall bg-slot" data-bg="img/community/fan-3.jpg" role="img" aria-label="Community-Bild 3"></div>
+      <div class="bg-slot" data-bg="img/community/fan-4.jpg" role="img" aria-label="Community-Bild 4"></div>
+      <div class="bg-slot" data-bg="img/community/fan-5.jpg" role="img" aria-label="Community-Bild 5"></div>
+      <div class="bg-slot" data-bg="img/community/fan-6.jpg" role="img" aria-label="Community-Bild 6"></div>
+      <div class="bg-slot" data-bg="img/community/fan-7.jpg" role="img" aria-label="Community-Bild 7"></div>
+      <div class="g-wide bg-slot" data-bg="img/community/fan-8.jpg" role="img" aria-label="Community-Bild 8"></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     04 REGELN & FEEDBACK
+     ================================================================ -->
+<section class="sec">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label"><span class="num">04</span>Miteinander</div>
+      <h2 class="sec-title">Regeln und Feedback.</h2>
+    </div>
+    <div class="split align-items-start">
+      <ol class="legend">
+        <li><span>Regel 1</span></li>
+        <li><span>Regel 2</span></li>
+        <li><span>Regel 3</span></li>
+        <li><span>Regel 4</span></li>
+      </ol>
+      <div>
+        <h3>Fehler gefunden?</h3>
+        <p class="dim">Wie und wo meldet man Fehler oder gibt Feedback?</p>
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-signal btn-sm arrow" href="#">Bug melden</a>
+          <a class="btn btn-line btn-sm" href="#">Feedback geben</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ================================================================
+     FOOTER
+     ================================================================ -->
+<footer class="cc-footer">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <p class="dim mb-0" style="max-width: 24em">Ein Satz über das Spiel – zum Beispiel euer Slogan.</p>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2 offset-lg-1">
+        <h2 class="footer-title">Spiel</h2>
+        <ul class="footer-links">
+          <li><a href="index.html">Start</a></li>
+          <li><a href="download.html">Download</a></li>
+          <li><a href="erklaerung.html">Erklärung</a></li>
+          <li><a href="konzept.html">Konzept</a></li>
+          <li><a href="entwicklung.html">Entwicklung</a></li>
+          <li><a href="combat.html">Combat</a></li>
+          <li><a href="hosting.html">Hosting</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <h2 class="footer-title">Leute</h2>
+        <ul class="footer-links">
+          <li><a href="community.html">Community</a></li>
+          <li><a href="team.html">Team</a></li>
+          <li><a href="#">Kontakt</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <h2 class="footer-title">Kanäle</h2>
+        <ul class="footer-links">
+          <li><a href="#">Discord</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">YouTube</a></li>
+        </ul>
+      </div>
+    </div>
+    <svg class="wordmark" viewBox="0 0 1000 96" aria-hidden="true" focusable="false"><text x="0" y="92" textLength="1000" lengthAdjust="spacingAndGlyphs">COSMIC CONFLICT</text></svg>
+    <div class="footer-bottom">
+      <span>&copy; <span data-year>2026</span> Cosmic Conflict · [Team / Schule]</span>
+      <span>3D-Modelle aus dem Spiel, in Echtzeit gerendert</span>
+      <span><a href="#">Impressum</a> · <a href="#">Datenschutz</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="js/main.js"></script>
+<!-- 3D-Modelle (three.js) -->
+<script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  } }
+</script>
+<script type="module" src="js/showroom.js"></script>
+</body>
+</html>
