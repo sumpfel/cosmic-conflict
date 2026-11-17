@@ -12,7 +12,7 @@ default = ["dev"]
 dev = ["bevy/dynamic_linking"]
 
 [dependencies]
-bevy = { version = "0.20.1", features = ["wayland"] }
+bevy = { version = "0.20.1", features = ["jpeg", "wayland"] }
 bevy_egui = "0.43.1"
 cc_core.workspace = true
 cc_protocol.workspace = true

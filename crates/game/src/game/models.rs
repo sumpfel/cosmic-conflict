@@ -1,7 +1,11 @@
-//! Procedural models for units, buildings and resource deposits, built from Bevy primitives.
+//! Models for units, buildings and resource deposits.
+//!
+//! At start-up every model is built from Bevy primitives (the fallback); `model_assets` then
+//! replaces them with the Blender-generated GLBs (`tools/blender/build_models.py`) once those and
+//! their textures are loaded (`Models::ready`).
 //!
 //! Local frame: +Y is "up" (the surface normal for things on a planet), −Z is forward.
-//! Every part uses a material *slot*; `Team` becomes the owner's colour at spawn time.
+//! Every part has one material, or one per player colour (team-coloured parts).
 
 use std::collections::HashMap;
 use std::f32::consts::FRAC_PI_2;
@@ -25,21 +29,26 @@ pub enum Slot {
 #[derive(Clone)]
 pub struct Part {
     pub mesh: Handle<Mesh>,
-    pub slot: Slot,
+    /// One material, or one per player colour (indexed by team).
+    pub mats: Vec<Handle<StandardMaterial>>,
     pub transform: Transform,
+}
+
+impl Part {
+    pub fn material(&self, team: u8) -> Handle<StandardMaterial> {
+        self.mats[team as usize % self.mats.len()].clone()
+    }
 }
 
 #[derive(Resource)]
 pub struct Models {
-    mats: HashMap<Slot, Handle<StandardMaterial>>,
-    team: Vec<Handle<StandardMaterial>>,
-    team_glow: Vec<Handle<StandardMaterial>>,
     pub ghost_ok: Handle<StandardMaterial>,
     pub ghost_bad: Handle<StandardMaterial>,
-    pub planet: Handle<StandardMaterial>,
     pub sphere: Handle<Mesh>,
     models: HashMap<String, Vec<Part>>,
     deposits: HashMap<Res, Vec<Part>>,
+    /// Set once the Blender models replaced the primitives (or there were none to load).
+    pub ready: bool,
 }
 
 /// Visual size factor for units (the simulation radii are small next to a 60 m planet).
@@ -58,15 +67,24 @@ pub fn team_color(i: u8) -> Color {
     Color::srgb_u8(r, g, b)
 }
 
+/// Emissive colour of team-coloured lights (engine rings, door strips, visors).
+pub fn team_glow_color(i: u8) -> LinearRgba {
+    let c = team_color(i).to_linear();
+    LinearRgba::rgb(0.6 + c.red * 6.0, 0.6 + c.green * 6.0, 0.6 + c.blue * 6.0)
+}
+
+type SlotMats = HashMap<Slot, Vec<Handle<StandardMaterial>>>;
+
 struct Kit<'a> {
     meshes: &'a mut Assets<Mesh>,
+    mats: &'a SlotMats,
     parts: Vec<Part>,
 }
 
 impl Kit<'_> {
     fn add(&mut self, mesh: impl Into<Mesh>, slot: Slot, transform: Transform) -> &mut Self {
         let mesh = self.meshes.add(mesh.into());
-        self.parts.push(Part { mesh, slot, transform });
+        self.parts.push(Part { mesh, mats: self.mats[&slot].clone(), transform });
         self
     }
     fn at(x: f32, y: f32, z: f32) -> Transform {
@@ -90,10 +108,10 @@ fn along_z(t: Transform) -> Transform {
     t.with_rotation(Quat::from_rotation_x(FRAC_PI_2))
 }
 
-fn build_models(meshes: &mut Assets<Mesh>) -> HashMap<String, Vec<Part>> {
+fn build_models(meshes: &mut Assets<Mesh>, mats: &SlotMats) -> HashMap<String, Vec<Part>> {
     use Slot::*;
     let at = Kit::at;
-    let mut k = Kit { meshes, parts: Vec::new() };
+    let mut k = Kit { meshes, mats, parts: Vec::new() };
     let mut m = HashMap::new();
 
     // --- Units -------------------------------------------------------------------------------
@@ -208,10 +226,10 @@ fn build_models(meshes: &mut Assets<Mesh>) -> HashMap<String, Vec<Part>> {
     m
 }
 
-fn build_deposits(meshes: &mut Assets<Mesh>) -> HashMap<Res, Vec<Part>> {
+fn build_deposits(meshes: &mut Assets<Mesh>, mats: &SlotMats) -> HashMap<Res, Vec<Part>> {
     use Slot::*;
     let at = Kit::at;
-    let mut k = Kit { meshes, parts: Vec::new() };
+    let mut k = Kit { meshes, mats, parts: Vec::new() };
     let mut m = HashMap::new();
     k.add(ball(1.0), Ore, at(0.0, 0.3, 0.0).with_scale(Vec3::new(1.4, 0.8, 1.1)))
         .add(ball(0.8), Ore, at(1.2, 0.2, 0.6).with_scale(Vec3::new(1.0, 0.7, 1.2)))
@@ -240,12 +258,13 @@ impl Models {
         &self.deposits[&r]
     }
 
-    pub fn material(&self, slot: Slot, team: u8) -> Handle<StandardMaterial> {
-        match slot {
-            Slot::Team => self.team[team as usize % self.team.len()].clone(),
-            Slot::Glow => self.team_glow[team as usize % self.team_glow.len()].clone(),
-            s => self.mats[&s].clone(),
-        }
+    /// Replaces a unit/building model (Blender GLB instead of primitives).
+    pub fn set_model(&mut self, key: &str, parts: Vec<Part>) {
+        self.models.insert(key.to_string(), parts);
+    }
+
+    pub fn set_deposit(&mut self, r: Res, parts: Vec<Part>) {
+        self.deposits.insert(r, parts);
     }
 
     /// Spawns the parts as children of `parent`. `override_mat` paints everything (ghosts).
@@ -260,7 +279,7 @@ impl Models {
     ) {
         commands.entity(parent).with_children(|c| {
             for p in parts {
-                let mat = override_mat.cloned().unwrap_or_else(|| self.material(p.slot, team));
+                let mat = override_mat.cloned().unwrap_or_else(|| p.material(team));
                 let mut t = p.transform;
                 t.translation *= scale;
                 t.scale *= scale;
@@ -311,26 +330,17 @@ pub fn init_models(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut
         }),
     );
     let team = (0..PLAYER_COLORS.len() as u8).map(|i| mat(m, team_color(i), 0.35, 0.4)).collect();
-    let team_glow = (0..PLAYER_COLORS.len() as u8)
-        .map(|i| {
-            let c = team_color(i).to_linear();
-            glow(m, LinearRgba::rgb(0.6 + c.red * 6.0, 0.6 + c.green * 6.0, 0.6 + c.blue * 6.0))
-        })
-        .collect();
+    let team_glow = (0..PLAYER_COLORS.len() as u8).map(|i| glow(m, team_glow_color(i))).collect();
     let ghost = |m: &mut Assets<StandardMaterial>, c: Color| {
         m.add(StandardMaterial { base_color: c, alpha_mode: AlphaMode::Blend, unlit: true, ..default() })
     };
     let ghost_ok = ghost(m, Color::srgba(0.3, 1.0, 0.4, 0.45));
     let ghost_bad = ghost(m, Color::srgba(1.0, 0.25, 0.2, 0.45));
-    let planet = m.add(StandardMaterial {
-        base_color: Color::WHITE,
-        perceptual_roughness: 0.85,
-        metallic: 0.0,
-        reflectance: 0.25,
-        ..default()
-    });
-    let models = build_models(&mut meshes);
-    let deposits = build_deposits(&mut meshes);
+    let mut slot_mats: SlotMats = mats.into_iter().map(|(s, h)| (s, vec![h])).collect();
+    slot_mats.insert(Slot::Team, team);
+    slot_mats.insert(Slot::Glow, team_glow);
+    let models = build_models(&mut meshes, &slot_mats);
+    let deposits = build_deposits(&mut meshes, &slot_mats);
     let sphere = meshes.add(Sphere::new(1.0).mesh().ico(48).expect("ico"));
-    commands.insert_resource(Models { mats, team, team_glow, ghost_ok, ghost_bad, planet, sphere, models, deposits });
+    commands.insert_resource(Models { ghost_ok, ghost_bad, sphere, models, deposits, ready: false });
 }

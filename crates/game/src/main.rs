@@ -69,7 +69,17 @@ fn main() {
         .add_plugins(
             DefaultPlugins
                 .set(WindowPlugin {
-                    primary_window: Some(Window { title: "Cosmic Conflict".into(), resolution, ..default() }),
+                    primary_window: Some(Window {
+                        title: "Cosmic Conflict".into(),
+                        resolution,
+                        // `CC_FPS=1` measures the real frame rate.
+                        present_mode: if std::env::var_os("CC_FPS").is_some() {
+                            bevy::window::PresentMode::AutoNoVsync
+                        } else {
+                            bevy::window::PresentMode::AutoVsync
+                        },
+                        ..default()
+                    }),
                     ..default()
                 })
                 .set(bevy::log::LogPlugin {

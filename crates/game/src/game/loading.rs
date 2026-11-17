@@ -11,10 +11,11 @@ use crossbeam_channel::Receiver;
 use super::camera::OrbitCam;
 use super::input::{Placement, Selection};
 use super::models::Models;
-use super::planet_mesh::{planet_mesh, subdivisions_for};
-use super::scene::spawn_planet_with_mesh;
+use super::planet_mesh::planet_mesh;
+use super::planet_render::{PlanetAssets, spawn_planet_visual};
 use super::world::{ClientWorld, DepositVisual, WorldEntity};
 use crate::net::{MatchRes, Net};
+use crate::settings::Settings;
 use crate::AppState;
 
 #[derive(Resource)]
@@ -27,14 +28,15 @@ pub struct LoadingTask {
 #[derive(Component)]
 pub struct PlanetVisual;
 
-pub fn begin_loading(mut commands: Commands, mres: Res<MatchRes>) {
+pub fn begin_loading(mut commands: Commands, mres: Res<MatchRes>, settings: Res<Settings>) {
     let Some(start) = mres.start.clone() else { return };
+    let graphics = settings.graphics;
     let (tx, rx) = crossbeam_channel::bounded(1);
     std::thread::spawn(move || {
         let sys = Arc::new(system::generate(&start.settings, start.players.len()));
         let meshes: Vec<Mesh> = std::thread::scope(|s| {
             let handles: Vec<_> =
-                sys.planets.iter().map(|p| s.spawn(move || planet_mesh(p, subdivisions_for(p.radius)))).collect();
+                sys.planets.iter().map(|p| s.spawn(move || planet_mesh(p, graphics.planet_subdivisions(p.radius)))).collect();
             handles.into_iter().map(|h| h.join().expect("planet mesh")).collect()
         });
         let _ = tx.send((sys, meshes));
@@ -50,16 +52,20 @@ pub fn poll_loading(
     net: Res<Net>,
     models: Res<Models>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut planet_assets: PlanetAssets,
     mut next: ResMut<NextState<AppState>>,
 ) {
     let Some(mut task) = task else { return };
     let Some(start) = mres.start.as_ref() else { return };
+    // Wait for the Blender models so nothing spawns with the primitive fallbacks.
+    if !models.ready {
+        return;
+    }
     if !task.sent {
         let Ok((sys, planet_meshes)) = task.rx.try_recv() else { return };
         for (p, mesh) in sys.planets.iter().zip(planet_meshes) {
             let handle = meshes.add(mesh);
-            let e = spawn_planet_with_mesh(&mut commands, &mut materials, &models, p, handle, PlanetVisual);
+            let e = spawn_planet_visual(&mut commands, &mut planet_assets, models.sphere.clone(), p, handle, PlanetVisual);
             commands.entity(e).insert(WorldEntity);
         }
         let mut deposit_entities = Vec::with_capacity(sys.deposits.len());

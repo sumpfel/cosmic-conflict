@@ -5,15 +5,22 @@
 //! planets and the sun, and hover in low orbit when sent to a planet. The terrain relief is
 //! cosmetic: the simulation uses each planet's base sphere.
 //!
-//! `Sim::step()` order: economy (income, extraction, population) → training → units (orders,
-//! movement, weapons) → building weapons → separation → damage → deaths → defeat / victory.
+//! Every number of a unit or building comes from its owner's [`Stats`] (the data files changed
+//! by finished research). Hits drain shields first, then the hull (damage kind × armour class,
+//! minus armour, see `data/combat.ron`); splash hits other enemies around the target.
+//! Stealthed units can only be targeted by players with a detector in range.
+//!
+//! `Sim::step()` order: economy (income, extraction, population) → training → research →
+//! detection → units (orders, movement, weapons) → building weapons → separation → damage →
+//! shields, repair and auras → deaths → defeat / victory.
 
 mod tests;
 
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::sync::Arc;
 
-use cc_core::content::{BuildingKind, Domain, UnitKind, Weapon};
+use cc_core::content::{Aura, BuildingKind, DamageKind, Domain, Sensors, UnitKind, Weapon};
+use cc_core::research::{self, Stats, TechKind};
 use cc_core::settings::MatchSettings;
 use cc_core::system::{ORBIT_ALTITUDE, SUN_RADIUS, StarSystem};
 use cc_core::{ContentDb, PlayerId, Vec3, geo};
@@ -48,6 +55,11 @@ pub struct Unit {
     pub hp: f32,
     pub order: Order,
     pub cooldown: f32,
+    pub shield: f32,
+    /// Seconds since the last hit (shields recharge after `CombatRules::shield_delay`).
+    pub since_hit: f32,
+    /// Stealth: seconds left during which everyone can target it (after firing).
+    pub revealed: f32,
 }
 
 #[derive(Clone, Debug)]
@@ -66,6 +78,11 @@ pub struct Building {
     pub deposit: Option<u32>,
     /// Training is waiting for housing (notice sent once).
     pub stalled: bool,
+    pub shield: f32,
+    pub since_hit: f32,
+    /// Labs: queued research projects (the first one runs).
+    pub research: Vec<TechKind>,
+    pub research_time: f32,
 }
 
 impl Building {
@@ -84,6 +101,14 @@ pub struct PlayerState {
     pub pop_cap: u32,
     pub defeated: bool,
     pub surrendered: bool,
+    /// Finished research (index = tech kind).
+    pub techs: Vec<bool>,
+}
+
+impl PlayerState {
+    pub fn done_techs(&self) -> Vec<TechKind> {
+        (0..self.techs.len() as TechKind).filter(|k| self.techs[*k as usize]).collect()
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -108,6 +133,30 @@ pub struct Sim {
     notices: Vec<(PlayerId, String)>,
     /// Set when the match is over: `Some(winner)`.
     pub winner: Option<Option<PlayerId>>,
+    /// Effective stats per player (recomputed when research finishes).
+    stats: BTreeMap<PlayerId, Arc<Stats>>,
+    /// Stealthed units: bit mask of the players who can target them right now.
+    detected: BTreeMap<EntityId, u32>,
+}
+
+/// A weapon hit, applied after everything moved and fired.
+#[derive(Clone, Copy, Debug)]
+struct Hit {
+    target: EntityId,
+    damage: f32,
+    kind: DamageKind,
+}
+
+/// The strongest aura effects reaching one entity.
+#[derive(Clone, Copy, Debug, Default)]
+struct AuraEffect {
+    shield: f32,
+    shield_regen: f32,
+    repair: f32,
+}
+
+fn bit(p: PlayerId) -> u32 {
+    1 << (p as u32 & 31)
 }
 
 /// Something that can be shot at.
@@ -120,6 +169,15 @@ struct Body {
     space: bool,
     planet: u16,
     radius: f32,
+    stealth: bool,
+    /// Players that can target it although it is stealthed.
+    detected: u32,
+}
+
+impl Body {
+    fn targetable_by(&self, player: PlayerId) -> bool {
+        !self.stealth || self.detected & bit(player) != 0
+    }
 }
 
 fn can_hit(w: &Weapon, attacker_planet: Option<u16>, target: &Body) -> bool {
@@ -161,7 +219,10 @@ impl Sim {
             changed_deposits: BTreeSet::new(),
             notices: Vec::new(),
             winner: None,
+            stats: BTreeMap::new(),
+            detected: BTreeMap::new(),
         };
+        let base = Arc::new(Stats::new(&sim.content, &[]));
         let cc = sim.content.building_kind("command_center").expect("command_center");
         let drone = sim.content.unit_kind("drone").expect("drone");
         for p in players {
@@ -174,13 +235,16 @@ impl Sim {
                 pop_cap: 0,
                 defeated: false,
                 surrendered: false,
+                techs: vec![false; sim.content.techs.len()],
             });
+            sim.stats.insert(p.id, base.clone());
             let Some(home) = sim.system.home_of(p.slot) else { continue };
             let (planet, start, radius) = (home.id, home.start_dir, home.radius);
             let id = sim.spawn_building(p.id, cc, planet, start, None);
             let b = sim.buildings.get_mut(&id).expect("just spawned");
             b.progress = 1.0;
-            b.hp = sim.content.building(cc).hp;
+            b.hp = base.building(cc).hp;
+            b.shield = base.building(cc).shield;
             let ring = (sim.content.building(cc).radius + 3.0) / radius;
             for i in 0..4 {
                 let dir = geo::offset(start, 0.4 + i as f32 * 1.5, ring);
@@ -199,14 +263,17 @@ impl Sim {
 
     pub fn spawn_unit(&mut self, owner: PlayerId, kind: UnitKind, loc: Loc) -> EntityId {
         let id = self.alloc();
-        let hp = self.content.unit(kind).hp;
-        self.units.insert(id, Unit { id, owner, kind, loc, hp, order: Order::Idle, cooldown: 0.0 });
+        let st = self.stats_of(owner).unit(kind).clone();
+        self.units.insert(
+            id,
+            Unit { id, owner, kind, loc, hp: st.hp, order: Order::Idle, cooldown: 0.0, shield: st.shield, since_hit: 99.0, revealed: 0.0 },
+        );
         id
     }
 
     fn spawn_building(&mut self, owner: PlayerId, kind: BuildingKind, planet: u16, dir: Vec3, deposit: Option<u32>) -> EntityId {
         let id = self.alloc();
-        let hp = self.content.building(kind).hp * 0.1;
+        let hp = self.stats_of(owner).building(kind).hp * 0.1;
         self.buildings.insert(
             id,
             Building {
@@ -222,9 +289,61 @@ impl Sim {
                 cooldown: 0.0,
                 deposit,
                 stalled: false,
+                shield: 0.0,
+                since_hit: 99.0,
+                research: Vec::new(),
+                research_time: 0.0,
             },
         );
         id
+    }
+
+    /// The effective stats of a player's units and buildings (data + finished research).
+    pub fn stats_of(&self, player: PlayerId) -> Arc<Stats> {
+        self.stats.get(&player).cloned().unwrap_or_else(|| Arc::new(Stats::new(&self.content, &[])))
+    }
+
+    pub fn has_tech(&self, player: PlayerId, tech: TechKind) -> bool {
+        self.player(player).is_some_and(|p| p.techs.get(tech as usize).copied().unwrap_or(false))
+    }
+
+    /// Research `player` still needs for a unit / building (first missing tech).
+    pub fn missing_unit_tech(&self, player: PlayerId, kind: UnitKind) -> Option<TechKind> {
+        self.content.unit_tech[kind as usize].iter().copied().find(|t| !self.has_tech(player, *t))
+    }
+
+    pub fn missing_building_tech(&self, player: PlayerId, kind: BuildingKind) -> Option<TechKind> {
+        self.content.building_tech[kind as usize].iter().copied().find(|t| !self.has_tech(player, *t))
+    }
+
+    /// Research queued in any of the player's labs.
+    fn queued_research(&self, player: PlayerId) -> Vec<TechKind> {
+        self.buildings.values().filter(|b| b.owner == player).flat_map(|b| b.research.iter().copied()).collect()
+    }
+
+    /// Effective sensors of a unit or building with its owner and world position (for fog of
+    /// war). Buildings under construction only have half their sight.
+    pub fn sensors_of(&self, id: EntityId) -> Option<(PlayerId, Vec3, Sensors)> {
+        if let Some(u) = self.units.get(&id) {
+            return Some((u.owner, self.world_pos(u.loc), self.stats_of(u.owner).unit(u.kind).sensors));
+        }
+        let b = self.buildings.get(&id)?;
+        let mut s = self.stats_of(b.owner).building(b.kind).sensors;
+        if !b.finished() {
+            s = Sensors { sight: s.sight * 0.5, ..Sensors::default() };
+        }
+        Some((b.owner, self.system.planets[b.planet as usize].ground(b.dir), s))
+    }
+
+    /// Whether `player` can target this entity (false for stealthed enemy units that no detector
+    /// of theirs sees and that have not fired recently).
+    pub fn targetable_by(&self, id: EntityId, player: PlayerId) -> bool {
+        match self.units.get(&id) {
+            Some(u) if u.owner != player && self.content.unit(u.kind).stealth && u.revealed <= 0.0 => {
+                self.detected.get(&id).is_some_and(|m| m & bit(player) != 0)
+            }
+            _ => true,
+        }
     }
 
     pub fn player(&self, id: PlayerId) -> Option<&PlayerState> {
@@ -380,7 +499,7 @@ impl Sim {
             }
             GameCommand::Attack { units, target } => {
                 let Some(body) = self.body(target) else { return };
-                if body.owner == player {
+                if body.owner == player || !self.targetable_by(target, player) {
                     return;
                 }
                 for id in self.owned_units(player, &units) {
@@ -421,6 +540,11 @@ impl Sim {
                 if let Some(r) = self.missing_requirement(player, kind) {
                     let name = self.content.building(r).name.clone();
                     self.notice(player, format!("Requires a finished {name}."));
+                    return;
+                }
+                if let Some(t) = self.missing_building_tech(player, kind) {
+                    let name = self.content.tech(t).name.clone();
+                    self.notice(player, format!("Requires research: {name}."));
                     return;
                 }
                 // A colonizer founds the building itself (one ship per order).
@@ -479,6 +603,11 @@ impl Sim {
                     self.notice(player, "The queue is full.");
                     return;
                 }
+                if let Some(t) = self.missing_unit_tech(player, kind) {
+                    let name = self.content.tech(t).name.clone();
+                    self.notice(player, format!("Requires research: {name}."));
+                    return;
+                }
                 if self.pay(player, self.content.unit(kind).cost.arr()) {
                     self.buildings.get_mut(&building).expect("exists").queue.push(kind);
                 }
@@ -503,13 +632,59 @@ impl Sim {
                     return;
                 }
                 b.hp = 0.0;
-                let (kind, finished, queue) = (b.kind, b.finished(), std::mem::take(&mut b.queue));
+                let (kind, finished, queue, research) =
+                    (b.kind, b.finished(), std::mem::take(&mut b.queue), std::mem::take(&mut b.research));
                 if !finished {
                     let cost = self.content.building(kind).cost.arr();
                     self.refund(player, cost, 0.75);
                 }
                 for k in queue {
                     let cost = self.content.unit(k).cost.arr();
+                    self.refund(player, cost, 1.0);
+                }
+                for t in research {
+                    let cost = self.content.tech(t).cost.arr();
+                    self.refund(player, cost, 1.0);
+                }
+            }
+            GameCommand::Research { building, tech } => {
+                if tech as usize >= self.content.techs.len() {
+                    return;
+                }
+                let Some(b) = self.buildings.get(&building) else { return };
+                if b.owner != player || !b.finished() || !self.content.building(b.kind).research {
+                    return;
+                }
+                if b.research.len() >= MAX_RESEARCH_QUEUE {
+                    self.notice(player, "The research queue is full.");
+                    return;
+                }
+                // Prerequisites must be finished or queued earlier in this same lab.
+                let lab_queue = b.research.clone();
+                let done = self.player(player).map(|p| p.techs.clone()).unwrap_or_default();
+                let everywhere = self.queued_research(player);
+                if everywhere.contains(&tech) {
+                    self.notice(player, "That is already being researched.");
+                    return;
+                }
+                if let Some(why) = research::blocked(&self.content, tech, &done, &lab_queue) {
+                    self.notice(player, why);
+                    return;
+                }
+                if self.pay(player, self.content.tech(tech).cost.arr()) {
+                    self.buildings.get_mut(&building).expect("exists").research.push(tech);
+                }
+            }
+            GameCommand::CancelResearch { building } => {
+                let Some(b) = self.buildings.get_mut(&building) else { return };
+                if b.owner != player {
+                    return;
+                }
+                if let Some(t) = b.research.pop() {
+                    if b.research.is_empty() {
+                        b.research_time = 0.0;
+                    }
+                    let cost = self.content.tech(t).cost.arr();
                     self.refund(player, cost, 1.0);
                 }
             }
@@ -528,7 +703,16 @@ impl Sim {
                 Loc::Ground { planet, .. } => (false, planet),
                 Loc::Space { .. } => (true, NO_PLANET),
             };
-            return Some(Body { id, owner: u.owner, pos: self.world_pos(u.loc), space, planet, radius: def.radius });
+            return Some(Body {
+                id,
+                owner: u.owner,
+                pos: self.world_pos(u.loc),
+                space,
+                planet,
+                radius: def.radius,
+                stealth: def.stealth && u.revealed <= 0.0,
+                detected: self.detected.get(&id).copied().unwrap_or(0),
+            });
         }
         self.buildings.get(&id).map(|b| Body {
             id,
@@ -537,6 +721,8 @@ impl Sim {
             space: false,
             planet: b.planet,
             radius: self.content.building(b.kind).radius,
+            stealth: false,
+            detected: 0,
         })
     }
 
@@ -545,19 +731,16 @@ impl Sim {
         let dt = TICK_DT;
         self.economy(dt);
         self.training(dt);
+        self.research(dt);
+        self.detection();
         let bodies: Vec<Body> = self.units.keys().chain(self.buildings.keys()).filter_map(|id| self.body(*id)).collect();
         let index: HashMap<EntityId, usize> = bodies.iter().enumerate().map(|(i, b)| (b.id, i)).collect();
-        let mut damage: Vec<(EntityId, f32)> = Vec::new();
-        self.update_units(dt, &bodies, &index, &mut damage);
-        self.building_weapons(dt, &bodies, &mut damage);
+        let mut hits: Vec<Hit> = Vec::new();
+        self.update_units(dt, &bodies, &index, &mut hits);
+        self.building_weapons(dt, &bodies, &mut hits);
         self.separate();
-        for (id, d) in damage {
-            if let Some(u) = self.units.get_mut(&id) {
-                u.hp -= d;
-            } else if let Some(b) = self.buildings.get_mut(&id) {
-                b.hp -= d;
-            }
-        }
+        self.apply_hits(&hits);
+        self.recover(dt);
         self.cleanup_dead();
         if self.tick.is_multiple_of(10) {
             self.check_victory();
@@ -576,7 +759,7 @@ impl Sim {
             }
         }
         for b in self.buildings.values().filter(|b| b.finished()) {
-            let pop = self.content.building(b.kind).pop;
+            let pop = self.stats.get(&b.owner).map(|s| s.building(b.kind).pop).unwrap_or(0);
             if let Some(p) = self.players.iter_mut().find(|p| p.id == b.owner) {
                 p.pop_cap = (p.pop_cap + pop).min(POP_LIMIT);
             }
@@ -589,12 +772,13 @@ impl Sim {
         }
         let mut gains: Vec<(PlayerId, [f32; 3])> = Vec::new();
         for b in self.buildings.values().filter(|b| b.finished()) {
-            let def = self.content.building(b.kind);
-            let mut rate = def.income.arr();
+            let Some(st) = self.stats.get(&b.owner) else { continue };
+            let st = st.building(b.kind);
+            let mut rate = st.income;
             if let Some(d) = b.deposit {
                 let left = self.deposits[d as usize];
                 if left > 0.0 {
-                    let take = (def.rate * dt).min(left);
+                    let take = (st.rate * dt).min(left);
                     self.deposits[d as usize] = left - take;
                     self.changed_deposits.insert(d);
                     rate[self.system.deposits[d as usize].kind.idx()] += take / dt;
@@ -656,14 +840,19 @@ impl Sim {
         }
     }
 
-    fn update_units(&mut self, dt: f32, bodies: &[Body], index: &HashMap<EntityId, usize>, damage: &mut Vec<(EntityId, f32)>) {
+    fn update_units(&mut self, dt: f32, bodies: &[Body], index: &HashMap<EntityId, usize>, hits: &mut Vec<Hit>) {
+        let splash = self.content.combat.splash_damage;
+        let reveal = self.content.combat.reveal_time;
         let ids: Vec<EntityId> = self.units.keys().copied().collect();
         let mut founded: Vec<(EntityId, PlayerId, BuildingKind, u16, Vec3)> = Vec::new();
         let mut progress: Vec<(EntityId, f32)> = Vec::new();
         for id in ids {
             let u = self.units[&id].clone();
             let def = self.content.unit(u.kind);
-            let speed = def.speed * dt;
+            let stats = self.stats_of(u.owner);
+            let st = stats.unit(u.kind);
+            let weapon = st.weapon;
+            let speed = st.speed * dt;
             let here_planet = match u.loc {
                 Loc::Ground { planet, .. } => Some(planet),
                 Loc::Space { .. } => None,
@@ -672,21 +861,24 @@ impl Sim {
             let mut loc = u.loc;
             let mut order = u.order.clone();
             let mut cooldown = (u.cooldown - dt).max(0.0);
+            let mut revealed = u.revealed;
             let mut fire_at: Option<Body> = None;
 
             match &u.order {
-                Order::Idle => {
-                    if let Some(w) = &def.weapon {
+                // Cloaked units hold fire unless ordered to attack (firing reveals them).
+                Order::Idle if !def.stealth => {
+                    if let Some(w) = &weapon {
                         fire_at = nearest_enemy(bodies, u.owner, my_pos, w, here_planet);
                     }
                 }
+                Order::Idle => {}
                 Order::Move(goal) => {
                     if self.move_towards(&mut loc, *goal, speed, 0.0) {
                         order = Order::Idle;
                     }
                 }
-                Order::Attack(t) => match (index.get(t).map(|i| bodies[*i]), &def.weapon) {
-                    (Some(target), Some(w)) if can_hit(w, here_planet, &target) => {
+                Order::Attack(t) => match (index.get(t).map(|i| bodies[*i]), &weapon) {
+                    (Some(target), Some(w)) if can_hit(w, here_planet, &target) && target.targetable_by(u.owner) => {
                         if my_pos.distance(target.pos) <= w.range + target.radius {
                             fire_at = Some(target);
                         } else {
@@ -732,21 +924,24 @@ impl Sim {
                 }
             }
 
-            if let (Some(target), Some(w)) = (fire_at, &def.weapon)
+            if let (Some(target), Some(w)) = (fire_at, &weapon)
                 && cooldown <= 0.0
             {
-                damage.push((target.id, w.damage));
-                self.shots.push(Shot { from: id, to: target.id });
+                fire(&mut self.shots, hits, splash, id, u.owner, &target, w, bodies);
                 cooldown = w.cooldown;
+                if def.stealth {
+                    revealed = reveal;
+                }
             }
             let u = self.units.get_mut(&id).expect("exists");
             u.loc = loc;
             u.order = order;
             u.cooldown = cooldown;
+            u.revealed = revealed;
         }
         for (bid, amount) in progress {
             if let Some(b) = self.buildings.get_mut(&bid) {
-                let max = self.content.building(b.kind).hp;
+                let max = self.stats.get(&b.owner).map(|s| s.building(b.kind).hp).unwrap_or(1.0);
                 let before = b.progress;
                 b.progress = (b.progress + amount).min(1.0);
                 b.hp = (b.hp + max * 0.9 * (b.progress - before)).min(max);
@@ -760,9 +955,11 @@ impl Sim {
             match self.placement(kind, planet, dir) {
                 Ok((dir, deposit)) => {
                     let id = self.spawn_building(owner, kind, planet, dir, deposit);
+                    let st = self.stats_of(owner).building(kind).clone();
                     let b = self.buildings.get_mut(&id).expect("just spawned");
                     b.progress = 1.0;
-                    b.hp = self.content.building(kind).hp;
+                    b.hp = st.hp;
+                    b.shield = st.shield;
                     self.units.remove(&ship);
                     let (name, pname) = (self.content.building(kind).name.clone(), self.system.planets[planet as usize].name.clone());
                     self.notice(owner, format!("{name} founded on {pname}."));
@@ -812,21 +1009,196 @@ impl Sim {
         }
     }
 
-    fn building_weapons(&mut self, dt: f32, bodies: &[Body], damage: &mut Vec<(EntityId, f32)>) {
+    fn building_weapons(&mut self, dt: f32, bodies: &[Body], hits: &mut Vec<Hit>) {
         let system = self.system.clone();
+        let splash = self.content.combat.splash_damage;
         for b in self.buildings.values_mut() {
-            let Some(w) = &self.content.building(b.kind).weapon else { continue };
+            let Some(st) = self.stats.get(&b.owner) else { continue };
+            let Some(w) = st.building(b.kind).weapon else { continue };
             b.cooldown = (b.cooldown - dt).max(0.0);
             if !b.finished() || b.cooldown > 0.0 {
                 continue;
             }
             let pos = system.planets[b.planet as usize].ground(b.dir);
-            if let Some(t) = nearest_enemy(bodies, b.owner, pos, w, Some(b.planet)) {
-                damage.push((t.id, w.damage));
-                self.shots.push(Shot { from: b.id, to: t.id });
+            if let Some(t) = nearest_enemy(bodies, b.owner, pos, &w, Some(b.planet)) {
+                fire(&mut self.shots, hits, splash, b.id, b.owner, &t, &w, bodies);
                 b.cooldown = w.cooldown;
             }
         }
+    }
+
+    /// Shields first, then the hull (see `CombatRules::hit`).
+    fn apply_hits(&mut self, hits: &[Hit]) {
+        let content = self.content.clone();
+        for h in hits {
+            if let Some(u) = self.units.get_mut(&h.target) {
+                let def = content.unit(u.kind);
+                let armor = self.stats.get(&u.owner).map(|s| s.unit(u.kind).armor).unwrap_or(def.armor);
+                u.hp -= content.combat.hit(h.damage, h.kind, def.armor_class, armor, &mut u.shield);
+                u.since_hit = 0.0;
+            } else if let Some(b) = self.buildings.get_mut(&h.target) {
+                let def = content.building(b.kind);
+                let armor = self.stats.get(&b.owner).map(|s| s.building(b.kind).armor).unwrap_or(def.armor);
+                b.hp -= content.combat.hit(h.damage, h.kind, def.armor_class, armor, &mut b.shield);
+                b.since_hit = 0.0;
+            }
+        }
+    }
+
+    /// The strongest shield / repair aura reaching each own unit and building.
+    fn auras(&self) -> HashMap<EntityId, AuraEffect> {
+        let mut sources: Vec<(PlayerId, Option<u16>, Vec3, Aura)> = Vec::new();
+        for u in self.units.values() {
+            if let Some(a) = self.stats.get(&u.owner).and_then(|s| s.unit(u.kind).aura) {
+                let planet = match u.loc {
+                    Loc::Ground { planet, .. } => Some(planet),
+                    Loc::Space { .. } => None,
+                };
+                sources.push((u.owner, planet, self.world_pos(u.loc), a));
+            }
+        }
+        for b in self.buildings.values().filter(|b| b.finished()) {
+            if let Some(a) = self.stats.get(&b.owner).and_then(|s| s.building(b.kind).aura) {
+                sources.push((b.owner, Some(b.planet), self.system.planets[b.planet as usize].ground(b.dir), a));
+            }
+        }
+        let mut out: HashMap<EntityId, AuraEffect> = HashMap::new();
+        if sources.is_empty() {
+            return out;
+        }
+        let mut apply = |id: EntityId, owner: PlayerId, planet: Option<u16>, pos: Vec3, radius: f32| {
+            for (o, p, at, a) in &sources {
+                if *o == owner && *p == planet && at.distance(pos) <= a.radius + radius {
+                    let e = out.entry(id).or_default();
+                    e.shield = e.shield.max(a.shield);
+                    e.shield_regen = e.shield_regen.max(a.shield_regen);
+                    e.repair = e.repair.max(a.repair);
+                }
+            }
+        };
+        for u in self.units.values() {
+            let planet = match u.loc {
+                Loc::Ground { planet, .. } => Some(planet),
+                Loc::Space { .. } => None,
+            };
+            apply(u.id, u.owner, planet, self.world_pos(u.loc), self.content.unit(u.kind).radius);
+        }
+        for b in self.buildings.values() {
+            let pos = self.system.planets[b.planet as usize].ground(b.dir);
+            apply(b.id, b.owner, Some(b.planet), pos, self.content.building(b.kind).radius);
+        }
+        out
+    }
+
+    /// Shield recharge, self-repair, auras and stealth timers.
+    fn recover(&mut self, dt: f32) {
+        let auras = self.auras();
+        let delay = self.content.combat.shield_delay;
+        for u in self.units.values_mut() {
+            let Some(st) = self.stats.get(&u.owner) else { continue };
+            let st = st.unit(u.kind);
+            let a = auras.get(&u.id).copied().unwrap_or_default();
+            u.since_hit += dt;
+            u.revealed = (u.revealed - dt).max(0.0);
+            if u.since_hit >= delay {
+                u.shield += st.shield_regen.max(a.shield_regen) * dt;
+            }
+            u.shield = u.shield.min(st.shield + a.shield);
+            let heal = st.regen + a.repair;
+            if heal > 0.0 && u.hp > 0.0 {
+                u.hp = (u.hp + heal * dt).min(st.hp);
+            }
+        }
+        for b in self.buildings.values_mut() {
+            let Some(st) = self.stats.get(&b.owner) else { continue };
+            let st = st.building(b.kind);
+            let a = auras.get(&b.id).copied().unwrap_or_default();
+            b.since_hit += dt;
+            if !b.finished() {
+                continue;
+            }
+            if b.since_hit >= delay {
+                b.shield += st.shield_regen.max(a.shield_regen) * dt;
+            }
+            b.shield = b.shield.min(st.shield + a.shield);
+            let heal = st.regen + a.repair;
+            if heal > 0.0 && b.hp > 0.0 {
+                b.hp = (b.hp + heal * dt).min(st.hp);
+            }
+        }
+    }
+
+    /// Which players can target each stealthed unit (detectors in range).
+    fn detection(&mut self) {
+        self.detected.clear();
+        let stealthy: Vec<(EntityId, PlayerId, Vec3)> = self
+            .units
+            .values()
+            .filter(|u| self.content.unit(u.kind).stealth)
+            .map(|u| (u.id, u.owner, self.world_pos(u.loc)))
+            .collect();
+        if stealthy.is_empty() {
+            return;
+        }
+        let detectors: Vec<(PlayerId, Vec3, f32)> = self
+            .units
+            .keys()
+            .chain(self.buildings.keys())
+            .filter_map(|id| self.sensors_of(*id))
+            .filter(|(_, _, s)| s.detect > 0.0)
+            .map(|(owner, pos, s)| (owner, pos, s.detect))
+            .collect();
+        for (id, owner, pos) in stealthy {
+            let mask = detectors.iter().filter(|(p, at, r)| *p != owner && at.distance(pos) <= *r).fold(0, |m, (p, _, _)| m | bit(*p));
+            if mask != 0 {
+                self.detected.insert(id, mask);
+            }
+        }
+    }
+
+    fn research(&mut self, dt: f32) {
+        let mut finished: Vec<(PlayerId, TechKind)> = Vec::new();
+        for b in self.buildings.values_mut().filter(|b| b.finished() && !b.research.is_empty()) {
+            let tech = b.research[0];
+            b.research_time += dt;
+            if b.research_time >= self.content.tech(tech).time {
+                b.research_time = 0.0;
+                b.research.remove(0);
+                finished.push((b.owner, tech));
+            }
+        }
+        for (owner, tech) in finished {
+            self.complete_research(owner, tech);
+        }
+    }
+
+    /// Marks a tech as researched and applies its effects (hit point upgrades also heal by the
+    /// difference).
+    pub fn complete_research(&mut self, player: PlayerId, tech: TechKind) {
+        let Some(p) = self.player_mut(player) else { return };
+        if p.techs.get(tech as usize).is_none_or(|d| *d) {
+            return;
+        }
+        p.techs[tech as usize] = true;
+        let done = p.done_techs();
+        let old = self.stats_of(player);
+        let new = Arc::new(Stats::new(&self.content, &done));
+        for u in self.units.values_mut().filter(|u| u.owner == player) {
+            let gain = new.unit(u.kind).hp - old.unit(u.kind).hp;
+            if gain > 0.0 {
+                u.hp += gain;
+            }
+        }
+        for b in self.buildings.values_mut().filter(|b| b.owner == player) {
+            let gain = new.building(b.kind).hp - old.building(b.kind).hp;
+            if gain > 0.0 {
+                b.hp += gain * (0.1 + 0.9 * b.progress.min(1.0));
+            }
+        }
+        self.stats.insert(player, new);
+        self.update_population();
+        let name = self.content.tech(tech).name.clone();
+        self.notice(player, format!("Research complete: {name}."));
     }
 
     /// Pushes overlapping ground units apart along the surface, and ships apart in space.
@@ -911,6 +1283,48 @@ impl Sim {
         }
     }
 
+    /// Development helper (`CC_SHOWCASE` on the server): finishes research (all of it, or only
+    /// tier 1) and places one finished building of every kind and one of every unit around the
+    /// player's start, for screenshots and trying things out.
+    pub fn dev_showcase(&mut self, player: PlayerId, all_research: bool) {
+        let Some(slot) = self.player(player).map(|p| p.slot) else { return };
+        let Some(home) = self.system.home_of(slot) else { return };
+        let (planet, start, radius) = (home.id, home.start_dir, home.radius);
+        let mut techs: Vec<TechKind> = (0..self.content.techs.len() as TechKind).filter(|t| all_research || self.content.tech(*t).tier == 1).collect();
+        techs.sort_by_key(|t| self.content.tech(*t).tier);
+        for t in techs {
+            self.complete_research(player, t);
+        }
+        let kinds: Vec<BuildingKind> = (0..self.content.buildings.len() as BuildingKind)
+            .filter(|k| {
+                let d = self.content.building(*k);
+                !d.core && !d.extracts && d.id != "habitat"
+            })
+            .collect();
+        let mut i = 0;
+        for kind in kinds {
+            let site = (i..i + 600).map(|j| (j, geo::offset(start, j as f32 * 0.61, (14.0 + j as f32 * 0.09) / radius))).find(|(_, d)| self.placement(kind, planet, *d).is_ok());
+            let Some((j, dir)) = site else { continue };
+            i = j + 1;
+            let id = self.spawn_building(player, kind, planet, dir, None);
+            let st = self.stats_of(player).building(kind).clone();
+            let b = self.buildings.get_mut(&id).expect("just spawned");
+            b.progress = 1.0;
+            b.hp = st.hp;
+            b.shield = st.shield;
+        }
+        let units: Vec<UnitKind> = (0..self.content.units.len() as UnitKind).collect();
+        for (n, kind) in units.into_iter().enumerate() {
+            let az = n as f32 * 0.45 + 2.0;
+            let loc = match self.content.unit(kind).domain {
+                Domain::Ground => Loc::Ground { planet, dir: geo::offset(start, az, 11.0 / radius) },
+                Domain::Space => Loc::Space { pos: self.system.planets[planet as usize].orbit_point(geo::offset(start, az, 22.0 / radius)) },
+            };
+            self.spawn_unit(player, kind, loc);
+        }
+        self.update_population();
+    }
+
     /// Removes a player who left (counts as surrender).
     pub fn remove_player(&mut self, id: PlayerId) {
         if let Some(p) = self.player_mut(id) {
@@ -935,7 +1349,7 @@ impl Sim {
                     Order::Attack(_) => Activity::Attacking,
                     Order::Build(_) => Activity::Building,
                 };
-                UnitSnap { id: u.id, owner: u.owner, kind: u.kind, planet, pos, hp: u.hp, activity }
+                UnitSnap { id: u.id, owner: u.owner, kind: u.kind, planet, pos, hp: u.hp, shield: u.shield, activity }
             })
             .collect();
         let buildings = self
@@ -951,22 +1365,49 @@ impl Sim {
                 progress: b.progress,
                 queue: b.queue.clone(),
                 train_progress: b.queue.first().map(|k| b.train_time / self.content.unit(*k).time).unwrap_or(0.0),
+                shield: b.shield,
+                research: b.research.clone(),
+                research_progress: b.research.first().map(|t| b.research_time / self.content.tech(*t).time).unwrap_or(0.0),
             })
             .collect();
         let players = self
             .players
             .iter()
-            .map(|p| PlayerSnap { id: p.id, stock: p.stock, income: p.income, pop: p.pop, pop_cap: p.pop_cap, defeated: p.defeated })
+            .map(|p| PlayerSnap {
+                id: p.id,
+                stock: p.stock,
+                income: p.income,
+                pop: p.pop,
+                pop_cap: p.pop_cap,
+                defeated: p.defeated,
+                techs: p.done_techs(),
+            })
             .collect();
         let deposits = std::mem::take(&mut self.changed_deposits).into_iter().map(|d| (d, self.deposits[d as usize])).collect();
         Snapshot { tick: self.tick, players, units, buildings, deposits, shots: std::mem::take(&mut self.shots) }
     }
 }
 
+/// Records a shot: the hit on the target plus splash hits on other enemies around it.
+#[allow(clippy::too_many_arguments)]
+fn fire(shots: &mut Vec<Shot>, hits: &mut Vec<Hit>, splash_frac: f32, from: EntityId, owner: PlayerId, target: &Body, w: &Weapon, bodies: &[Body]) {
+    hits.push(Hit { target: target.id, damage: w.damage, kind: w.kind });
+    if w.splash > 0.0 {
+        let damage = w.damage * splash_frac;
+        for b in bodies
+            .iter()
+            .filter(|b| b.id != target.id && b.owner != owner && b.space == target.space && b.pos.distance(target.pos) - b.radius <= w.splash)
+        {
+            hits.push(Hit { target: b.id, damage, kind: w.kind });
+        }
+    }
+    shots.push(Shot { from, to: target.id });
+}
+
 fn nearest_enemy(bodies: &[Body], owner: PlayerId, pos: Vec3, w: &Weapon, planet: Option<u16>) -> Option<Body> {
     bodies
         .iter()
-        .filter(|b| b.owner != owner && can_hit(w, planet, b))
+        .filter(|b| b.owner != owner && b.targetable_by(owner) && can_hit(w, planet, b))
         .map(|b| (b.pos.distance(pos) - b.radius, b))
         .filter(|(d, _)| *d <= w.range)
         .min_by(|a, b| a.0.total_cmp(&b.0))

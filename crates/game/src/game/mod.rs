@@ -4,8 +4,10 @@ pub mod camera;
 pub mod effects;
 pub mod input;
 pub mod loading;
+pub mod model_assets;
 pub mod models;
 pub mod planet_mesh;
+pub mod planet_render;
 pub mod scene;
 pub mod world;
 
@@ -17,12 +19,14 @@ pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<input::Selection>()
+        app.add_plugins(planet_render::PlanetRenderPlugin)
+            .init_resource::<input::Selection>()
             .init_resource::<input::Placement>()
             .init_resource::<input::Drag>()
             .init_resource::<input::Hover>()
             .init_resource::<effects::Effects>()
-            .add_systems(Startup, (scene::setup_scene, models::init_models, effects::init_effects))
+            .add_systems(Startup, (scene::setup_scene, models::init_models, model_assets::start_model_load, effects::init_effects))
+            .add_systems(Update, model_assets::finish_model_load)
             .add_systems(OnEnter(AppState::Menu), loading::teardown)
             .add_systems(OnExit(AppState::Menu), scene::despawn_menu_backdrop)
             .add_systems(Update, (scene::ensure_menu_backdrop, scene::spin_backdrop).run_if(in_state(AppState::Menu)))
@@ -43,8 +47,7 @@ impl Plugin for GamePlugin {
                     .run_if(in_state(AppState::InGame)),
             )
             .add_systems(PostUpdate, scene::follow_stars.after(TransformSystems::Propagate))
-            .add_systems(Update, scene::adjust_sunlight)
-            .add_systems(Update, screenshot_hook);
+            .add_systems(Update, (screenshot_hook, fps_log));
     }
 }
 
@@ -65,5 +68,18 @@ fn screenshot_hook(mut commands: Commands, time: Res<Time>, mut done: Local<u8>,
             *done = 2;
         }
         _ => {}
+    }
+}
+
+/// Development helper: `CC_FPS=1` logs the frame rate every 2 s (vsync is off then, see main).
+fn fps_log(time: Res<Time>, mut acc: Local<(f32, u32)>) {
+    if std::env::var_os("CC_FPS").is_none() {
+        return;
+    }
+    acc.0 += time.delta_secs();
+    acc.1 += 1;
+    if acc.0 >= 2.0 {
+        info!("fps: {:.1} ({:.2} ms)", acc.1 as f32 / acc.0, acc.0 * 1000.0 / acc.1 as f32);
+        *acc = (0.0, 0);
     }
 }

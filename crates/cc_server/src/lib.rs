@@ -402,7 +402,14 @@ impl Server {
         let sys = Arc::new(system::generate(&self.settings, players.len()));
         let map_hash = sys.hash;
         log::info!("star system generated in {:.3}s (hash {map_hash:016x})", t.elapsed().as_secs_f32());
-        let sim = Sim::new(self.content.clone(), sys, &self.settings, &inits);
+        let mut sim = Sim::new(self.content.clone(), sys, &self.settings, &inits);
+        // Development helper: one of everything (`CC_SHOWCASE=1`: all research; `=research`:
+        // only tier 1, to look at the research tree).
+        if let Ok(mode) = std::env::var("CC_SHOWCASE") {
+            for p in &inits {
+                sim.dev_showcase(p.id, mode != "research");
+            }
+        }
         for c in &self.clients {
             if let Some(p) = &c.player {
                 c.conn.send(&ServerMsg::StartGame(GameStart {

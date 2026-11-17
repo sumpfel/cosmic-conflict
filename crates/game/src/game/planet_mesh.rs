@@ -1,9 +1,10 @@
-//! Planet globes: a displaced icosphere with vertex colours from the biome palette, plus a thin
-//! atmosphere shell. Heights come from `cc_core::system::Planet` so units and buildings stand
-//! exactly on the drawn terrain.
+//! Planet globes: a displaced icosphere with vertex colours from the biome palette. Heights come
+//! from `cc_core::system::Planet` so units and buildings stand exactly on the drawn terrain.
+//! UV0 carries data for the planet shader (`planet_render.rs`): x = cavity (height above the
+//! smoothed terrain, metres; negative in hollows), y = sea mask (1 = sea).
 
 use bevy::asset::RenderAssetUsages;
-use bevy::mesh::VertexAttributeValues;
+use bevy::mesh::{Indices, VertexAttributeValues};
 use bevy::prelude::*;
 use cc_core::rng::{Noise, smoothstep};
 use cc_core::system::{Biome, Planet};
@@ -139,23 +140,85 @@ pub fn planet_mesh(p: &Planet, subdivisions: u32) -> Mesh {
     };
     let pal = palette(p.biome);
     let detail = Noise::new(p.seed ^ 0xC0105);
-    let mut pos = Vec::with_capacity(positions.len());
-    let mut col = Vec::with_capacity(positions.len());
+    let sea_level = p.biome.sea_level();
+    let n = positions.len();
+    let mut pos = Vec::with_capacity(n);
+    let mut col = Vec::with_capacity(n);
+    let mut heights = Vec::with_capacity(n);
+    let mut sea = Vec::with_capacity(n);
     for v in positions {
         let dir = Vec3::from_array(*v).normalize();
         let e = p.elevation(dir);
-        pos.push((dir * (p.radius + p.height(dir))).to_array());
+        let h = p.height(dir);
+        pos.push((dir * (p.radius + h)).to_array());
         let c = color(p, &pal, &detail, dir, e);
         col.push([c[0], c[1], c[2], 1.0]);
+        heights.push(h);
+        sea.push(if sea_level.is_some_and(|s| e < s) { 1.0 } else { 0.0 });
     }
+    let cavity = cavity(&heights, mesh.indices());
+    let data: Vec<[f32; 2]> = cavity.into_iter().zip(sea).map(|(c, s)| [c, s]).collect();
     mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, pos);
     mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, col);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, data);
     mesh.compute_smooth_normals();
     mesh.asset_usage = RenderAssetUsages::RENDER_WORLD;
     mesh
 }
 
-/// Icosphere detail (Bevy subdivides each edge linearly; 79 is the maximum ≈ 64k vertices).
-pub fn subdivisions_for(radius: f32) -> u32 {
-    if radius >= 50.0 { 79 } else { 64 }
+/// Height of every vertex above the terrain smoothed over a few metres (a cheap baked
+/// ambient occlusion: hollows and valleys < 0, ridges > 0).
+fn cavity(heights: &[f32], indices: Option<&Indices>) -> Vec<f32> {
+    let n = heights.len();
+    let Some(indices) = indices else { return vec![0.0; n] };
+    let tris: Vec<usize> = indices.iter().collect();
+    let mut smooth = heights.to_vec();
+    let mut sum = vec![0.0f32; n];
+    let mut count = vec![0u32; n];
+    for _ in 0..8 {
+        sum.fill(0.0);
+        count.fill(0);
+        for &[i, j, k] in tris.as_chunks::<3>().0 {
+            for (a, b) in [(i, j), (j, k), (k, i)] {
+                sum[a] += smooth[b];
+                sum[b] += smooth[a];
+                count[a] += 1;
+                count[b] += 1;
+            }
+        }
+        for i in 0..n {
+            if count[i] > 0 {
+                smooth[i] = (smooth[i] * 2.0 + sum[i]) / (2 + count[i]) as f32;
+            }
+        }
+    }
+    heights.iter().zip(smooth).map(|(h, s)| h - s).collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn mesh_carries_sea_mask_and_cavity() {
+        let p = Planet {
+            id: 0,
+            name: "T".into(),
+            center: Vec3::ZERO,
+            radius: 40.0,
+            biome: Biome::Terran,
+            seed: 9,
+            home: None,
+            start_dir: Vec3::Y,
+            relief: 2.4,
+        };
+        let mesh = planet_mesh(&p, 30);
+        let Some(VertexAttributeValues::Float32x2(uv)) = mesh.attribute(Mesh::ATTRIBUTE_UV_0) else { panic!("uv0") };
+        let seas = uv.iter().filter(|d| d[1] > 0.5).count();
+        assert!(seas > uv.len() / 20 && seas < uv.len() * 19 / 20, "some sea, some land: {seas}/{}", uv.len());
+        assert!(uv.iter().all(|d| d[0].is_finite() && d[0].abs() < p.relief * 2.0));
+        assert!(uv.iter().any(|d| d[0] < -0.01) && uv.iter().any(|d| d[0] > 0.01), "hollows and ridges");
+        // The sea is the lowest, flat ground: never a ridge.
+        assert!(uv.iter().filter(|d| d[1] > 0.5).all(|d| d[0] < 0.01));
+    }
 }

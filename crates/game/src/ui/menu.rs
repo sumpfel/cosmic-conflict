@@ -7,6 +7,7 @@ use cc_core::PLAYER_COLORS;
 use cc_protocol::{ClientMsg, LobbyCmd};
 use egui::{Align2, Color32, RichText};
 
+use super::settings_window::SettingsWindow;
 use super::{ACCENT, BAD, DIM, GOOD, panel_frame, player_color32};
 use crate::audio::{Sfx, Sound};
 use crate::net::{ChatLog, HostedServer, LobbyRes, MenuMessage, Net, NetStatus};
@@ -44,6 +45,7 @@ pub fn menu_ui(
     mut state: ResMut<MenuUi>,
     mut sound: ResMut<Sound>,
     mut exit: MessageWriter<AppExit>,
+    mut settings_window: ResMut<SettingsWindow>,
 ) -> Result {
     let ctx = contexts.ctx_mut()?.clone();
     if ctx.input(|i| i.pointer.any_click()) && ctx.is_pointer_over_egui() {
@@ -67,6 +69,9 @@ pub fn menu_ui(
                 }
                 if big_button(ui, "Join Game").clicked() {
                     *screen = MenuScreen::Join;
+                }
+                if big_button(ui, "Settings").clicked() {
+                    settings_window.open = !settings_window.open;
                 }
                 if big_button(ui, "Quit").clicked() {
                     exit.write(AppExit::Success);

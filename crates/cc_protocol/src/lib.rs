@@ -8,18 +8,21 @@ pub mod transport;
 
 use cc_core::PlayerId;
 use cc_core::content::{BuildingKind, UnitKind};
+use cc_core::research::TechKind;
 use cc_core::settings::MatchSettings;
 use serde::{Deserialize, Serialize};
 
 pub use cc_core::system::NO_PLANET;
 
 /// Bump on every incompatible message change.
-pub const PROTOCOL_VERSION: u32 = 1;
+pub const PROTOCOL_VERSION: u32 = 2;
 pub const DEFAULT_PORT: u16 = 47900;
 pub const TICK_RATE: u32 = 20;
 pub const TICK_DT: f32 = 1.0 / TICK_RATE as f32;
 /// A snapshot is sent every this many ticks (10 Hz).
 pub const SNAPSHOT_EVERY: u64 = 2;
+/// Research projects a lab can have queued.
+pub const MAX_RESEARCH_QUEUE: usize = 5;
 
 pub type EntityId = u32;
 
@@ -92,6 +95,10 @@ pub enum GameCommand {
     /// Removes the last queued unit (refunded).
     CancelTrain { building: EntityId },
     Demolish { building: EntityId },
+    /// Queues a research project in an own lab (pays the cost).
+    Research { building: EntityId, tech: TechKind },
+    /// Removes the last queued research project of a lab (refunded).
+    CancelResearch { building: EntityId },
     Surrender,
 }
 
@@ -124,6 +131,7 @@ pub struct UnitSnap {
     /// Ground: unit direction from the planet's centre. Space: world position.
     pub pos: [f32; 3],
     pub hp: f32,
+    pub shield: f32,
     pub activity: Activity,
 }
 
@@ -140,6 +148,11 @@ pub struct BuildingSnap {
     pub queue: Vec<UnitKind>,
     /// Progress of the first unit in the queue 0..1.
     pub train_progress: f32,
+    pub shield: f32,
+    /// Labs: queued research projects, the first one is running.
+    pub research: Vec<TechKind>,
+    /// Progress of the running research project 0..1.
+    pub research_progress: f32,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -151,6 +164,8 @@ pub struct PlayerSnap {
     pub pop: u32,
     pub pop_cap: u32,
     pub defeated: bool,
+    /// Finished research.
+    pub techs: Vec<TechKind>,
 }
 
 /// A weapon fired (for visual effects).
@@ -198,5 +213,8 @@ mod tests {
         let bytes = postcard::to_allocvec(&m).unwrap();
         let back: ClientMsg = postcard::from_bytes(&bytes).unwrap();
         assert!(matches!(back, ClientMsg::Command(GameCommand::Build { kind: 3, .. })));
+        let m = ClientMsg::Command(GameCommand::Research { building: 7, tech: 12 });
+        let back: ClientMsg = postcard::from_bytes(&postcard::to_allocvec(&m).unwrap()).unwrap();
+        assert!(matches!(back, ClientMsg::Command(GameCommand::Research { building: 7, tech: 12 })));
     }
 }

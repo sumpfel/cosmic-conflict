@@ -1,10 +1,10 @@
 //! Mouse & keyboard in the match: picking, selection (click, box, double click), context
 //! commands (move / attack / help build), building placement with a live ghost, and the
-//! selection rings and health bars.
+//! selection rings, health / shield bars and sensor ranges.
 
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use cc_core::content::{BuildingKind, ContentDb, Domain};
+use cc_core::content::{BuildingKind, ContentDb, Domain, Sensors};
 use cc_core::geo;
 use cc_protocol::{EntityId, GameCommand, Target};
 
@@ -106,6 +106,9 @@ pub fn check_site(
     builders: &[EntityId],
 ) -> Result<Vec3, String> {
     let def = content.building(kind);
+    if let Some(t) = content.building_tech[kind as usize].iter().find(|t| !world.has_tech(**t)) {
+        return Err(format!("Requires research: {}.", content.tech(*t).name));
+    }
     let p = &world.system.planets[planet as usize];
     let colonizer = builders.iter().any(|id| world.units.get(id).is_some_and(|u| content.unit(u.snap.kind).colonizer));
     if !colonizer && !builders.iter().any(|id| world.units.get(id).is_some_and(|u| u.snap.planet == planet)) {
@@ -419,7 +422,53 @@ pub fn handle_input(
     }
 }
 
-/// Selection rings, hover ring, health and construction bars.
+/// Colours of the sensor range rings (also used by the HUD legend).
+pub const SENSOR_COLORS: [(&str, [f32; 3]); 5] = [
+    ("Sight", [0.85, 0.9, 1.0]),
+    ("Radar", [0.25, 1.0, 0.45]),
+    ("Seismic", [1.0, 0.6, 0.15]),
+    ("Deep space", [0.75, 0.4, 1.0]),
+    ("Detection", [0.2, 0.95, 1.0]),
+];
+
+/// Ranges of a sensor suite in the order of `SENSOR_COLORS`.
+pub fn sensor_ranges(s: &Sensors) -> [f32; 5] {
+    [s.sight, s.radar, s.seismic, s.deep, s.detect]
+}
+
+/// A ring of points at straight-line distance `range` from `at` (on the planet's surface for
+/// things on a planet, in the plane facing the camera for ships), as the simulation measures.
+#[allow(clippy::too_many_arguments)]
+fn range_ring(gizmos: &mut Gizmos, world: &ClientWorld, planet: Option<u16>, at: Vec3, up: Vec3, eye: Vec3, range: f32, color: Color) {
+    const N: usize = 72;
+    match planet.and_then(|p| world.system.planet(p)) {
+        Some(p) => {
+            let r = p.radius;
+            if range >= 2.0 * r {
+                return; // covers the whole globe
+            }
+            let ang = 2.0 * (range / (2.0 * r)).asin();
+            let dir = (at - p.center).normalize_or(up);
+            let side = dir.any_orthonormal_vector();
+            let pts: Vec<Vec3> = (0..=N)
+                .map(|i| {
+                    let a = i as f32 / N as f32 * std::f32::consts::TAU;
+                    let d = Quat::from_axis_angle(dir, a) * side;
+                    let q = (dir * ang.cos() + d * ang.sin()).normalize();
+                    p.surface(q) + q * 0.4
+                })
+                .collect();
+            gizmos.linestrip(pts, color);
+        }
+        None => {
+            let n = (eye - at).normalize_or(Vec3::Y);
+            gizmos.circle(Isometry3d::new(at, Quat::from_rotation_arc(Vec3::Z, n)), range, color);
+        }
+    }
+}
+
+/// Selection rings, hover ring, health / shield / construction bars and the sensor ranges of
+/// selected own units and buildings.
 pub fn draw_overlays(
     world: Option<Res<ClientWorld>>,
     content: Res<Content>,
@@ -443,12 +492,42 @@ pub fn draw_overlays(
         g.line(a, a.lerp(b, frac.clamp(0.0, 1.0)), c);
     };
     let health_color = |f: f32| if f > 0.6 { Color::srgb(0.2, 1.0, 0.3) } else if f > 0.3 { Color::srgb(1.0, 0.8, 0.1) } else { Color::srgb(1.0, 0.2, 0.1) };
+    let shield_color = Color::srgb(0.35, 0.65, 1.0);
+    // Sensor ranges of a few selected own things (rings get noisy with many).
+    let mut rings = 0;
+    for id in &selection.0 {
+        if rings >= 6 {
+            break;
+        }
+        let (owner, planet, pos, up, sensors) = if let Some(u) = world.units.get(id) {
+            let Some(st) = world.stats_of(u.snap.owner) else { continue };
+            let planet = (u.snap.planet != cc_protocol::NO_PLANET).then_some(u.snap.planet);
+            (u.snap.owner, planet, u.pos, u.up, st.unit(u.snap.kind).sensors)
+        } else if let Some(b) = world.buildings.get(id) {
+            let Some(st) = world.stats_of(b.snap.owner) else { continue };
+            (b.snap.owner, Some(b.snap.planet), b.pos, b.up, st.building(b.snap.kind).sensors)
+        } else {
+            continue;
+        };
+        if owner != world.me {
+            continue;
+        }
+        rings += 1;
+        for (i, ((_, c), range)) in SENSOR_COLORS.iter().zip(sensor_ranges(&sensors)).enumerate() {
+            // Deep-space sensors look at space, not the ground: drawn around the planet / ship.
+            if range > 0.0 {
+                let ground = if i == 3 { None } else { planet };
+                range_ring(&mut gizmos, &world, ground, pos, up, eye, range, Color::srgba(c[0], c[1], c[2], 0.55));
+            }
+        }
+    }
     for u in world.units.values() {
         let def = content.unit(u.snap.kind);
+        let Some(st) = world.stats_of(u.snap.owner).map(|s| s.unit(u.snap.kind)) else { continue };
         let r = def.radius * UNIT_SCALE;
         let selected = selection.0.contains(&u.snap.id);
         let hovered = hover.0 == Some(u.snap.id);
-        let damaged = u.snap.hp < def.hp;
+        let damaged = u.snap.hp < st.hp || (st.shield > 0.0 && u.snap.shield < st.shield);
         if !(selected || hovered || damaged) || eye.distance(u.pos) > 600.0 || occluded(&world, eye, u.pos + u.up) {
             continue;
         }
@@ -460,16 +539,21 @@ pub fn draw_overlays(
             ring(&mut gizmos, u.pos, up, r * 1.4, Color::srgba(1.0, 1.0, 1.0, 0.6));
         }
         if selected || damaged {
-            let f = u.snap.hp / def.hp;
-            bar(&mut gizmos, u.pos + u.up * (r * 2.2 + 0.6), r * 2.2, f, health_color(f));
+            let f = u.snap.hp / st.hp;
+            let top = u.pos + u.up * (r * 2.2 + 0.6);
+            bar(&mut gizmos, top, r * 2.2, f, health_color(f));
+            if u.snap.shield > 0.5 {
+                bar(&mut gizmos, top + u.up * 0.25, r * 2.2, u.snap.shield / st.shield.max(u.snap.shield), shield_color);
+            }
         }
     }
     for b in world.buildings.values() {
         let def = content.building(b.snap.kind);
+        let Some(st) = world.stats_of(b.snap.owner).map(|s| s.building(b.snap.kind)) else { continue };
         let selected = selection.0.contains(&b.snap.id);
         let hovered = hover.0 == Some(b.snap.id);
         let building = b.snap.progress < 1.0;
-        let damaged = b.snap.hp < def.hp && !building;
+        let damaged = (b.snap.hp < st.hp || (st.shield > 0.0 && b.snap.shield < st.shield)) && !building;
         if !(selected || hovered || damaged || building) || eye.distance(b.pos) > 900.0 || occluded(&world, eye, b.pos + b.up * 2.0) {
             continue;
         }
@@ -483,8 +567,11 @@ pub fn draw_overlays(
         if building {
             bar(&mut gizmos, top, def.radius * 1.6, b.snap.progress, Color::srgb(1.0, 0.85, 0.2));
         } else if selected || damaged {
-            let f = b.snap.hp / def.hp;
+            let f = b.snap.hp / st.hp;
             bar(&mut gizmos, top, def.radius * 1.6, f, health_color(f));
+            if b.snap.shield > 0.5 {
+                bar(&mut gizmos, top + b.up * 0.4, def.radius * 1.6, b.snap.shield / st.shield.max(b.snap.shield), shield_color);
+            }
         }
     }
 }

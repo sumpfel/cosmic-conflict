@@ -1,6 +1,7 @@
-//! Short-lived visuals: weapon tracers, explosions and order pings.
+//! Short-lived visuals: weapon tracers (one look per damage kind), explosions and order pings.
 
 use bevy::prelude::*;
+use cc_core::content::DamageKind;
 
 use super::models::{Models, team_color};
 use super::world::WorldEntity;
@@ -9,16 +10,36 @@ const TRACER_LIFE: f32 = 0.18;
 const EXPLOSION_LIFE: f32 = 0.7;
 const PING_LIFE: f32 = 0.6;
 
+struct Tracer {
+    from: Vec3,
+    to: Vec3,
+    color: Color,
+    kind: DamageKind,
+    age: f32,
+}
+
 #[derive(Resource, Default)]
 pub struct Effects {
-    shots: Vec<(Vec3, Vec3, Color, f32)>,
+    shots: Vec<Tracer>,
     pending_explosions: Vec<(Vec3, f32)>,
     pings: Vec<(Vec3, Vec3, Color, f32)>,
 }
 
 impl Effects {
-    pub fn shot(&mut self, from: Vec3, to: Vec3, team: u8) {
-        self.shots.push((from, to, team_color(team), 0.0));
+    /// A shot: kinetic rounds are team-coloured streaks, lasers red beams, ion bolts violet
+    /// arcs, plasma orange bolts; explosive and plasma hits burst at the target (`splash` size).
+    pub fn shot(&mut self, from: Vec3, to: Vec3, team: u8, kind: DamageKind, splash: f32) {
+        let color = match kind {
+            DamageKind::Kinetic => team_color(team),
+            DamageKind::Laser => Color::srgb(1.0, 0.15, 0.1),
+            DamageKind::Explosive => Color::srgb(1.0, 0.6, 0.2),
+            DamageKind::Plasma => Color::srgb(1.0, 0.45, 0.1),
+            DamageKind::Ion => Color::srgb(0.55, 0.3, 1.0),
+        };
+        self.shots.push(Tracer { from, to, color, kind, age: 0.0 });
+        if matches!(kind, DamageKind::Explosive | DamageKind::Plasma) {
+            self.pending_explosions.push((to, (splash * 0.8).max(0.7)));
+        }
     }
 
     pub fn explosion(&mut self, at: Vec3, size: f32) {
@@ -60,15 +81,42 @@ pub fn update_effects(
     mut explosions: Query<(Entity, &mut Explosion, &mut Transform)>,
 ) {
     let dt = time.delta_secs();
-    for (a, b, c, age) in fx.shots.iter_mut() {
-        *age += dt;
-        let t = (*age / TRACER_LIFE).clamp(0.0, 1.0);
-        let head = a.lerp(*b, (t * 1.6).min(1.0));
-        let tail = a.lerp(*b, (t * 1.6 - 0.5).clamp(0.0, 1.0));
-        let lin = c.to_linear();
-        gizmos.line(tail, head, Color::linear_rgb(lin.red * 6.0 + 1.0, lin.green * 6.0 + 1.0, lin.blue * 6.0 + 1.0));
+    for s in fx.shots.iter_mut() {
+        s.age += dt;
+        let t = (s.age / TRACER_LIFE).clamp(0.0, 1.0);
+        let lin = s.color.to_linear();
+        let hot = |k: f32| Color::linear_rgb(lin.red * k + 1.0, lin.green * k + 1.0, lin.blue * k + 1.0);
+        let (a, b) = (s.from, s.to);
+        match s.kind {
+            // Beams: the whole line at once, fading.
+            DamageKind::Laser => gizmos.line(a, b, hot(8.0 * (1.0 - t)).with_alpha(1.0 - t)),
+            // A crackling arc.
+            DamageKind::Ion => {
+                let side = (b - a).cross(Vec3::Y).normalize_or(Vec3::X) * 0.35;
+                let up = (b - a).cross(side).normalize_or(Vec3::Z) * 0.35;
+                let mut prev = a;
+                for k in 1..=8 {
+                    let f = k as f32 / 8.0;
+                    let n = ((f * 37.0 + s.age * 91.0).sin(), (f * 53.0 - s.age * 77.0).cos());
+                    let p = if k == 8 { b } else { a.lerp(b, f) + side * n.0 + up * n.1 };
+                    gizmos.line(prev, p, hot(10.0).with_alpha(1.0 - t));
+                    prev = p;
+                }
+            }
+            // Projectiles: a streak travelling to the target (plasma: a fat bolt).
+            _ => {
+                let head = a.lerp(b, (t * 1.6).min(1.0));
+                let tail = a.lerp(b, (t * 1.6 - 0.5).clamp(0.0, 1.0));
+                gizmos.line(tail, head, hot(6.0));
+                if s.kind == DamageKind::Plasma {
+                    let off = (b - a).any_orthonormal_vector() * 0.12;
+                    gizmos.line(tail + off, head + off, hot(10.0));
+                    gizmos.line(tail - off, head - off, hot(10.0));
+                }
+            }
+        }
     }
-    fx.shots.retain(|s| s.3 < TRACER_LIFE);
+    fx.shots.retain(|s| s.age < TRACER_LIFE);
     for (at, up, c, age) in fx.pings.iter_mut() {
         *age += dt;
         let r = 1.0 + *age * 6.0;

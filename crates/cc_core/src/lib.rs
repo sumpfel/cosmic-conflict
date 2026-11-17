@@ -1,12 +1,13 @@
 //! # cc_core — Cosmic Conflict's shared rules
 //!
 //! Engine-independent vocabulary used by the server, the simulation and the client:
-//! resources, the content database (`data/*.ron`), match settings and the deterministic
-//! star-system generator (planets are globes; every position on a planet is a unit direction
-//! from its centre).
+//! resources, the content database (`data/*.ron`, research tree and combat rules included),
+//! match settings and the deterministic star-system generator (planets are globes; every
+//! position on a planet is a unit direction from its centre).
 
 pub mod content;
 pub mod geo;
+pub mod research;
 pub mod rng;
 pub mod settings;
 pub mod system;

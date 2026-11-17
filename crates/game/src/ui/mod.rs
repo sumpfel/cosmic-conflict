@@ -2,6 +2,7 @@
 
 mod hud;
 mod menu;
+pub mod settings_window;
 
 use bevy::prelude::*;
 use bevy_egui::{EguiContexts, EguiPrimaryContextPass, egui};
@@ -14,11 +15,17 @@ pub struct UiPlugin;
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<menu::MenuUi>()
+            .init_resource::<settings_window::SettingsWindow>()
             .init_resource::<hud::HudState>()
             .add_systems(EguiPrimaryContextPass, setup_style)
             .add_systems(EguiPrimaryContextPass, menu::menu_ui.run_if(in_state(AppState::Menu)).after(setup_style))
             .add_systems(EguiPrimaryContextPass, menu::loading_ui.run_if(in_state(AppState::Loading)).after(setup_style))
-            .add_systems(EguiPrimaryContextPass, (hud::planet_labels, hud::hud_ui).chain().run_if(in_state(AppState::InGame)).after(setup_style));
+            .add_systems(EguiPrimaryContextPass, (hud::planet_labels, hud::hud_ui).chain().run_if(in_state(AppState::InGame)).after(setup_style))
+            // Last, so the window is drawn over the menu and the HUD.
+            .add_systems(
+                EguiPrimaryContextPass,
+                settings_window::settings_ui.after(menu::menu_ui).after(menu::loading_ui).after(hud::hud_ui),
+            );
     }
 }
 

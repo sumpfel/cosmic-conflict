@@ -32,3 +32,8 @@ Thumbs.db
 # Game saves / logs
 /saves/
 *.log
+
+# Raw downloads for the asset pipeline (tools/fetch_textures.py: preview HDRI); generated
+# textures and models in crates/game/assets/ are committed.
+/assets_src/
+__pycache__/

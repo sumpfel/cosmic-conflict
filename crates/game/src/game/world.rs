@@ -5,7 +5,8 @@ use std::collections::{BTreeMap, HashMap};
 use std::sync::Arc;
 
 use bevy::prelude::*;
-use cc_core::content::Domain;
+use cc_core::content::{ContentDb, Domain, Weapon};
+use cc_core::research::{Stats, TechKind};
 use cc_core::system::StarSystem;
 use cc_core::PlayerId;
 use cc_protocol::*;
@@ -51,6 +52,8 @@ pub struct ClientWorld {
     pub buildings: BTreeMap<EntityId, BuildingView>,
     pub deposits: Vec<f32>,
     pub deposit_entities: Vec<Entity>,
+    /// Effective stats per player (data + their finished research), recomputed when it changes.
+    effective: HashMap<PlayerId, (Vec<TechKind>, Arc<Stats>)>,
     since_snapshot: f32,
 }
 
@@ -66,8 +69,32 @@ impl ClientWorld {
             buildings: BTreeMap::new(),
             deposits,
             deposit_entities,
+            effective: HashMap::new(),
             since_snapshot: 0.0,
         }
+    }
+
+    /// A player's effective unit / building stats (after the first snapshot).
+    pub fn stats_of(&self, player: PlayerId) -> Option<&Stats> {
+        self.effective.get(&player).map(|(_, s)| s.as_ref())
+    }
+
+    /// My finished research.
+    pub fn my_techs(&self) -> &[TechKind] {
+        self.my_stats().map(|s| s.techs.as_slice()).unwrap_or(&[])
+    }
+
+    pub fn has_tech(&self, tech: TechKind) -> bool {
+        self.my_techs().contains(&tech)
+    }
+
+    /// The effective weapon of a unit or building.
+    pub fn weapon_of(&self, content: &ContentDb, id: EntityId) -> Option<Weapon> {
+        if let Some(u) = self.units.get(&id) {
+            return self.stats_of(u.snap.owner).and_then(|s| s.unit(u.snap.kind).weapon).or(content.unit(u.snap.kind).weapon);
+        }
+        let b = self.buildings.get(&id)?;
+        self.stats_of(b.snap.owner).and_then(|s| s.building(b.snap.kind).weapon).or(content.building(b.snap.kind).weapon)
     }
 
     pub fn color_of(&self, owner: PlayerId) -> u8 {
@@ -138,6 +165,11 @@ pub fn apply_snapshots(
     while let Some(snap) = incoming.0.pop_front() {
         world.since_snapshot = 0.0;
         world.stats = snap.players.iter().map(|p| (p.id, p.clone())).collect();
+        for p in &snap.players {
+            if world.effective.get(&p.id).is_none_or(|(t, _)| *t != p.techs) {
+                world.effective.insert(p.id, (p.techs.clone(), Arc::new(Stats::new(content, &p.techs))));
+            }
+        }
 
         // Units.
         let mut seen = Vec::with_capacity(snap.units.len());
@@ -208,7 +240,8 @@ pub fn apply_snapshots(
 
         for shot in snap.shots {
             if let (Some(a), Some(b), Some(owner)) = (world.entity_pos(shot.from), world.entity_pos(shot.to), world.owner_of(shot.from)) {
-                effects.shot(a, b, world.color_of(owner));
+                let w = world.weapon_of(content, shot.from);
+                effects.shot(a, b, world.color_of(owner), w.map(|w| w.kind).unwrap_or_default(), w.map(|w| w.splash).unwrap_or(0.0));
             }
         }
     }

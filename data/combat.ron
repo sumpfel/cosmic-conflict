@@ -1,0 +1,23 @@
+// Combat rules. A hit first drains the target's shield (damage × `shield`), whatever is left
+// hits the hull: damage × the multiplier for the target's armour class, minus its armour, but
+// never less than `min_damage` of it. Armour values are small (0–5): a point of armour matters
+// most against fast, weak weapons.
+//
+//   Kinetic   — bullets, shells, railguns: all-rounder, weak against buildings.
+//   Laser     — beams: shreds light targets, reflected by heavy plating.
+//   Explosive — missiles, bombs, shells: cracks buildings and heavy armour, usually splash.
+//   Plasma    — melts heavy armour; shields disperse some of it.
+//   Ion       — EMP: tears shields down, barely scratches bare hulls.
+(
+    multipliers: {
+        Kinetic:   (light: 1.0,  medium: 0.9,  heavy: 0.7,  structure: 0.7,  shield: 1.0),
+        Laser:     (light: 1.3,  medium: 1.0,  heavy: 0.65, structure: 0.6,  shield: 0.85),
+        Explosive: (light: 0.75, medium: 1.0,  heavy: 1.15, structure: 1.5,  shield: 0.8),
+        Plasma:    (light: 0.8,  medium: 1.1,  heavy: 1.45, structure: 1.15, shield: 0.7),
+        Ion:       (light: 0.5,  medium: 0.55, heavy: 0.6,  structure: 0.45, shield: 2.75),
+    },
+    min_damage: 0.2,
+    shield_delay: 3.0,
+    splash_damage: 0.5,
+    reveal_time: 2.0,
+)
